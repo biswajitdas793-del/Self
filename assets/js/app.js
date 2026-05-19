@@ -213,7 +213,7 @@ function shadeColor(hex, percent) {
 
 function phoneVisual(p) {
   if (p.image_url) {
-    return `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy"/>`;
+    return `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.classList.add('img-failed');this.remove();"/>`;
   }
   const ff = p.form_factor || 'bar';
   if (ff === 'fold') return svgFold(p);
