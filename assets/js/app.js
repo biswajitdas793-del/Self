@@ -213,7 +213,7 @@ function shadeColor(hex, percent) {
 
 function phoneVisual(p) {
   if (p.image_url) {
-    return `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy"/>`;
+    return `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.classList.add('img-failed');this.remove();"/>`;
   }
   const ff = p.form_factor || 'bar';
   if (ff === 'fold') return svgFold(p);
@@ -274,15 +274,17 @@ function productCard(p) {
   const searchQ = p.flipkart_query || title;
   const waMsg = `Hi Namaskar Telecom, is the ${title} available?`;
   const desc = p.description ? `<p class="product-desc">${escapeHtml(p.description)}</p>` : '';
-  const specs = `
+  // Phone-only spec row. For accessories we lean on the description + highlights instead.
+  const isPhone = (p.category || 'smartphone') === 'smartphone';
+  const specs = isPhone ? `
     <div class="spec-row">
       ${specChip(shortDisplay(p.display), ICON.display)}
       ${specChip(shortProcessor(p.processor), ICON.chip)}
       ${specChip(shortCamera(p.main_camera), ICON.camera)}
       ${specChip(p.battery, ICON.battery)}
-    </div>`;
+    </div>` : '';
   return `
-    <article class="product-card" data-name="${escapeHtml(p.name)}" data-brand="${escapeHtml(p.brand)}" data-price="${p.price_inr}" data-new="${p.is_new}">
+    <article class="product-card" data-name="${escapeHtml(p.name)}" data-brand="${escapeHtml(p.brand)}" data-category="${escapeHtml(p.category || 'smartphone')}" data-price="${p.price_inr}" data-new="${p.is_new}">
       <div class="product-media product-media-${p.form_factor || 'bar'}">
         ${p.is_new ? '<span class="product-tag new">New</span>' : ''}
         ${disc ? `<span class="product-discount">-${disc}%</span>` : ''}
@@ -327,6 +329,20 @@ function attachFavToggle(scope = document) {
   });
 }
 
+function getCategoryFromUrl() {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    return p.get('category') || 'all';
+  } catch (_) { return 'all'; }
+}
+
+const CATEGORY_LABELS = {
+  smartphone: 'Mobiles',
+  tws: 'TWS Earbuds',
+  headphones: 'Headphones',
+  smartwatches: 'Smartwatches',
+};
+
 async function loadFullCatalog() {
   const grid = document.getElementById('product-grid');
   if (!grid) return;
@@ -345,8 +361,18 @@ async function loadFullCatalog() {
     return;
   }
 
+  // Reflect URL ?category=… into the heading and active tab.
+  const initialCat = getCategoryFromUrl();
+  const heading = document.getElementById('page-title');
+  if (heading && initialCat !== 'all' && CATEGORY_LABELS[initialCat]) {
+    heading.textContent = CATEGORY_LABELS[initialCat];
+  }
+  document.querySelectorAll('#cat-tabs .cat-pill').forEach((a) => {
+    a.classList.toggle('active', a.dataset.cat === initialCat);
+  });
+
   renderCatalog(data);
-  attachFilters(data);
+  attachFilters(data, initialCat);
 }
 
 function renderCatalog(items) {
@@ -360,11 +386,24 @@ function renderCatalog(items) {
   attachFavToggle(grid);
 }
 
-function attachFilters(allProducts) {
+function attachFilters(allProducts, initialCategory = 'all') {
   const search = document.getElementById('search');
   const brandSel = document.getElementById('brand');
   const sortSel = document.getElementById('sort');
   if (!(search || brandSel || sortSel)) return;
+
+  // Rebuild brand options scoped to the active category so unrelated brands don't clutter the dropdown.
+  const repopulateBrands = (cat) => {
+    if (!brandSel) return;
+    const pool = cat === 'all' ? allProducts : allProducts.filter((p) => (p.category || 'smartphone') === cat);
+    const brands = Array.from(new Set(pool.map((p) => p.brand))).sort((a, b) => a.localeCompare(b));
+    const prev = brandSel.value;
+    brandSel.innerHTML = '<option value="all">All brands</option>' +
+      brands.map((b) => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+    brandSel.value = brands.includes(prev) ? prev : 'all';
+  };
+
+  repopulateBrands(initialCategory);
 
   const apply = () => {
     const q = (search?.value || '').toLowerCase().trim();
@@ -374,7 +413,8 @@ function attachFilters(allProducts) {
       const name = `${p.name} ${p.storage || ''}`.toLowerCase();
       const matchQ = !q || name.includes(q) || p.brand.toLowerCase().includes(q);
       const matchB = b === 'all' || p.brand === b;
-      return matchQ && matchB;
+      const matchC = initialCategory === 'all' || (p.category || 'smartphone') === initialCategory;
+      return matchQ && matchB && matchC;
     });
 
     const sort = sortSel?.value || 'featured';
@@ -386,6 +426,9 @@ function attachFilters(allProducts) {
     renderCatalog(visible);
   };
 
+  // Apply once on load so the category filter takes effect immediately.
+  apply();
+
   [search, brandSel, sortSel].forEach((el) => el && el.addEventListener('input', apply));
 }
 
@@ -393,14 +436,14 @@ async function loadFeatured() {
   const grid = document.getElementById('featured-grid');
   if (!grid) return;
 
-  grid.innerHTML = '<div class="catalog-loading" style="grid-column:1/-1;">Loading featured phones…</div>';
+  grid.innerHTML = '<div class="catalog-loading" style="grid-column:1/-1;">Loading featured products…</div>';
 
   const { data, error } = await supabase
     .from('products')
     .select('*')
     .eq('featured', true)
     .order('sort_order', { ascending: false })
-    .limit(4);
+    .limit(8);
 
   if (error || !data || !data.length) {
     console.error('Supabase featured error:', error);
