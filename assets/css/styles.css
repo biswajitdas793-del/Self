@@ -353,8 +353,34 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
   gap: 24px;
 }
 .brand-strip .label { font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-.brand-strip .brand { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; color: var(--ink-soft); opacity: .75; transition: opacity .15s, color .15s; }
+.brand-strip .brand { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; color: var(--ink-soft); opacity: .75; transition: opacity .15s, color .15s; text-decoration: none; }
 .brand-strip .brand:hover { opacity: 1; color: var(--brand); }
+.brand-strip .cat-tab { padding: 8px 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); opacity: 1; }
+.brand-strip .cat-tab:hover { border-color: var(--brand); color: var(--brand); background: rgba(166, 36, 33, 0.05); }
+
+/* ===== Category pill tabs on products page ===== */
+.cat-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: .92rem;
+  text-decoration: none;
+  transition: all .15s ease;
+}
+.cat-pill:hover { border-color: var(--brand); color: var(--brand); }
+.cat-pill.active { background: var(--brand); color: #fff; border-color: var(--brand); }
 
 /* ===== Categories ===== */
 .cat-grid {
