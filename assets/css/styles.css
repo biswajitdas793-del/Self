@@ -784,3 +784,50 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
   .product-grid { grid-template-columns: 1fr; }
   .hero-stats   { grid-template-columns: 1fr; }
 }
+
+/* ===== Dynamic catalog states ===== */
+.catalog-loading,
+.catalog-error,
+.catalog-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-size: .95rem;
+}
+.catalog-error { color: #b91c1c; }
+.catalog-error a { color: #b91c1c; text-decoration: underline; }
+
+/* Flipkart / Amazon compare buttons under each product */
+.compare-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.compare-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  transition: all .15s ease;
+  letter-spacing: .01em;
+}
+.compare-btn:hover { transform: translateY(-1px); }
+.compare-btn.fk { color: #2874f0; border-color: rgba(40,116,240,.32); background: rgba(40,116,240,.04); }
+.compare-btn.fk:hover { background: rgba(40,116,240,.1); border-color: rgba(40,116,240,.55); }
+.compare-btn.am { color: #ff9900; border-color: rgba(255,153,0,.4); background: rgba(255,153,0,.04); }
+.compare-btn.am:hover { background: rgba(255,153,0,.1); border-color: rgba(255,153,0,.65); }
+.compare-btn svg { opacity: .65; }
+
+/* Notice variants (contact form) */
+.notice.success { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.notice.error   { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
