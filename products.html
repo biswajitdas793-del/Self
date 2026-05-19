@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Products — Namaskar Telecom</title>
+<meta name="description" content="Browse our full range of smartphones, tablets, smartwatches and accessories from Apple, Samsung, OnePlus, Xiaomi, Vivo, OPPO, Realme and more." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23E63946'/%3E%3Ctext x='32' y='42' font-family='Poppins,Arial' font-size='30' font-weight='800' text-anchor='middle' fill='white'%3EN%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="container">
+    <div class="topbar-left">
+      <span class="hide-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13 1.05.37 2.07.72 3.06a2 2 0 0 1-.45 2.11L8.09 10.2a16 16 0 0 0 6 6l1.31-1.31a2 2 0 0 1 2.11-.45c.99.35 2.01.59 3.06.72A2 2 0 0 1 22 16.92z"/></svg>+91 80822 20143</span>
+    </div>
+    <div class="topbar-right">
+      <span class="hide-sm">Mon–Sun · 10:00 AM – 10:00 PM</span>
+      <a href="contact.html">Visit Store →</a>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <div class="container">
+    <a href="index.html" class="logo">
+      <div class="logo-mark">N</div>
+      <div class="logo-text"><strong>Namaskar Telecom</strong><small>Mobile · Accessories · Service</small></div>
+    </a>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="products.html" class="active">Products</a>
+      <a href="offers.html">Offers</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="contact.html" class="btn btn-ghost">Visit Store</a>
+      <a href="https://wa.me/918082220143" class="btn btn-primary">WhatsApp</a>
+    </div>
+    <button class="menu-btn" aria-label="Menu"><span></span></button>
+  </div>
+</header>
+
+<!-- Page head -->
+<section class="page-head">
+  <div class="container">
+    <div class="crumbs"><a href="index.html">Home</a> &nbsp;/&nbsp; Products</div>
+    <h1>All Products</h1>
+    <p style="max-width: 640px; color: var(--muted);">200+ models in stock across smartphones, smartwatches and accessories. Walk in to compare hands-on, or message us to confirm availability before you visit.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+
+    <!-- Filters -->
+    <div class="filters">
+      <input type="search" id="search" placeholder="Search by model or brand (eg. iPhone, Redmi)…" />
+      <select id="brand">
+        <option value="all">All brands</option>
+        <option value="Apple">Apple</option>
+        <option value="Samsung">Samsung</option>
+        <option value="Vivo">Vivo</option>
+        <option value="OPPO">OPPO</option>
+        <option value="Nothing">Nothing</option>
+        <option value="Tecno">Tecno</option>
+        <option value="OnePlus">OnePlus</option>
+        <option value="Xiaomi">Xiaomi</option>
+        <option value="Realme">Realme</option>
+        <option value="Motorola">Motorola</option>
+      </select>
+      <select id="sort">
+        <option value="featured">Sort: Featured</option>
+        <option value="new">Newest first</option>
+        <option value="low">Price: low to high</option>
+        <option value="high">Price: high to low</option>
+      </select>
+    </div>
+
+    <!-- Product grid (populated dynamically from Supabase) -->
+    <div class="product-grid" id="product-grid">
+      <div class="catalog-loading">Loading catalogue…</div>
+    </div>
+
+    <p style="text-align:center; color: var(--muted); margin-top: 30px; font-size: .9rem;">
+      Live in-store stock. Prices include GST. Use the Flipkart / Amazon links to compare — we usually match or beat them.
+    </p>
+
+  </div>
+</section>
+
+
+<!-- Footer (same as home) -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo footer-logo"><div class="logo-mark">N</div><div class="logo-text"><strong>Namaskar Telecom</strong><small>Mobile · Accessories · Service</small></div></div>
+        <p style="margin-top: 16px; max-width: 320px;">Your trusted neighbourhood mobile store — genuine phones, honest pricing, and after-sales care since 2012.</p>
+      </div>
+      <div><h4>Shop</h4><ul><li><a href="products.html">All Phones</a></li><li><a href="products.html">Accessories</a></li><li><a href="offers.html">Offers</a></li><li><a href="products.html">Smartwatches</a></li></ul></div>
+      <div><h4>Company</h4><ul><li><a href="about.html">About us</a></li><li><a href="contact.html">Contact</a></li><li><a href="contact.html">Service & support</a></li><li><a href="#">Privacy policy</a></li></ul></div>
+      <div><h4>Visit us</h4>
+        <ul class="footer-contact">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Shop No. 07, Balaji Paradise, Santoshi Mata Rd, Maharashtra 421301</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13 1.05.37 2.07.72 3.06a2 2 0 0 1-.45 2.11L8.09 10.2a16 16 0 0 0 6 6l1.31-1.31a2 2 0 0 1 2.11-.45c.99.35 2.01.59 3.06.72A2 2 0 0 1 22 16.92z"/></svg><span>+91 80822 20143</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Mon–Sun · 10:00 AM – 10:00 PM</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span id="year"></span> Namaskar Telecom. All rights reserved.</span>
+      <span>Designed for the people of our neighbourhood ❤</span>
+    </div>
+  </div>
+</footer>
+
+<a href="https://wa.me/918082220143" class="float-wa" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5A11.7 11.7 0 0 0 12 0C5.4 0 0 5.4 0 12c0 2.1.6 4.2 1.6 6L0 24l6.2-1.6A11.9 11.9 0 0 0 12 24c6.6 0 12-5.4 12-12 0-3.2-1.2-6.2-3.5-8.5z"/></svg>
+</a>
+
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
