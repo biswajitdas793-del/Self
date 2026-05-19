@@ -9,26 +9,216 @@ const wa = (msg) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`
 const flipkart = (q) => `https://www.flipkart.com/search?q=${encodeURIComponent(q)}`;
 const amazon = (q) => `https://www.amazon.in/s?k=${encodeURIComponent(q)}`;
 
-const brandColor = {
-  Apple: '#0F172A',
-  Samsung: '#1D3557',
-  Vivo: '#0EA5E9',
-  OPPO: '#16A34A',
-  Nothing: '#EAEAEA',
-  Tecno: '#8B5CF6',
-  OnePlus: '#E63946',
-  Xiaomi: '#FF6900',
-  Realme: '#F1C40F',
-  Motorola: '#0B5394',
+/* ===== Phone illustration system =====
+   Renders a distinct mockup per phone based on brand + form factor + id-derived color.
+   Front view shows screen + brand wordmark; back view shows brand-correct camera layout. */
+
+const BRAND_PALETTE = {
+  Apple:    [['#1F2937','#FFF'], ['#A8A29E','#1F2937'], ['#C9B58B','#1F2937'], ['#F5F5F0','#1F2937']],
+  Samsung:  [['#1B1F2A','#A0A8B8'], ['#3C4A66','#A0B0C5'], ['#7D8595','#1F2937'], ['#4F2E2E','#D4A099']],
+  Vivo:     [['#1A1F2E','#5B7CB8'], ['#0E2A4A','#C9B58B'], ['#E8E4D9','#1F2937'], ['#2D5547','#E8E4D9']],
+  OPPO:     [['#0F2A1F','#7BA890'], ['#1F2937','#E8E4D9'], ['#7D8595','#1F2937'], ['#3D2E4A','#C9A8D9']],
+  OnePlus:  [['#1F1F1F','#7BA890'], ['#0E2A35','#E8E4D9'], ['#2D2D2D','#D14B45']],
+  Xiaomi:   [['#1F2937','#FF6900'], ['#0F1A2A','#5B7CB8'], ['#E8E4D9','#1F2937'], ['#1F1F1F','#A8A29E']],
+  Realme:   [['#B89067','#1F2937'], ['#1F2937','#F5C453'], ['#2C3E50','#E8E4D9']],
+  Motorola: [['#3D5A6C','#E8E4D9'], ['#1F2937','#D4A099'], ['#5B6D54','#E8E4D9']],
+  Nothing:  [['#1A1A1A','#F5F5F5'], ['#F5F5F5','#1A1A1A']],
+  Tecno:    [['#1F1F1F','#C9B58B'], ['#0E2A35','#E8E4D9'], ['#3D3D3D','#F5C453']],
 };
 
-function svgPhone(brand) {
-  const c = brandColor[brand] || '#1f2937';
-  return `<svg viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect x="20" y="10" width="160" height="380" rx="30" fill="#1a1a1a"/>
-    <rect x="26" y="16" width="148" height="368" rx="26" fill="${c}"/>
-    <circle cx="100" cy="30" r="4" fill="#000"/>
+function pickColors(brand, id) {
+  const palette = BRAND_PALETTE[brand] || [['#1F2937','#A0A8B8']];
+  return palette[id % palette.length];
+}
+
+/* Brand-specific camera arrangement on the back of a bar phone. Returns SVG markup,
+   positioned in a 200x300 viewport at top-left around (40,40). */
+function brandCamera(brand, accentColor) {
+  const lens = (cx, cy, r = 14) =>
+    `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#0A0A0A" stroke="#2A2A2A" stroke-width="1.5"/>
+     <circle cx="${cx}" cy="${cy}" r="${r * 0.55}" fill="#1F2A3A"/>
+     <circle cx="${cx - r * 0.3}" cy="${cy - r * 0.3}" r="${r * 0.18}" fill="rgba(255,255,255,.35)"/>`;
+  const flash = (cx, cy) =>
+    `<circle cx="${cx}" cy="${cy}" r="4" fill="#F5E9C7" opacity=".85"/>`;
+
+  switch (brand) {
+    case 'Apple':
+      // Square island, 3 lenses 2x2 layout (top-left, top-right, bottom-left)
+      return `
+        <rect x="36" y="36" width="92" height="92" rx="22" fill="rgba(0,0,0,.35)"/>
+        ${lens(64, 64, 15)} ${lens(102, 64, 15)} ${lens(64, 102, 15)}
+        ${flash(102, 102)}`;
+    case 'Samsung':
+      // Floating 3 vertical lenses, no island (S-series style)
+      return `
+        ${lens(60, 50, 14)} ${lens(60, 86, 14)} ${lens(60, 122, 14)}
+        ${flash(60, 152)}`;
+    case 'Vivo':
+      // Large circular island with 2 lenses + small lens
+      return `
+        <circle cx="80" cy="80" r="50" fill="rgba(0,0,0,.42)"/>
+        ${lens(64, 64, 16)} ${lens(96, 96, 16)} ${lens(64, 100, 9)}
+        ${flash(100, 60)}`;
+    case 'OPPO':
+      // Big pill vertical with 3 lenses centered
+      return `
+        <rect x="48" y="34" width="64" height="108" rx="32" fill="rgba(0,0,0,.4)"/>
+        ${lens(80, 56, 14)} ${lens(80, 90, 14)} ${lens(80, 124, 10)}
+        ${flash(80, 148)}`;
+    case 'OnePlus':
+      // Big circular ring with 3 lenses (Hasselblad-style)
+      return `
+        <circle cx="80" cy="80" r="56" fill="rgba(0,0,0,.4)"/>
+        <circle cx="80" cy="80" r="50" fill="none" stroke="#3A3A3A" stroke-width="1.5"/>
+        ${lens(62, 62, 14)} ${lens(98, 62, 14)} ${lens(80, 98, 14)}
+        ${flash(110, 110)}`;
+    case 'Xiaomi':
+      // Large square island with prominent main + supporting lens
+      return `
+        <rect x="34" y="34" width="92" height="68" rx="14" fill="rgba(0,0,0,.4)"/>
+        ${lens(60, 68, 20)} ${lens(102, 60, 11)} ${lens(102, 88, 9)}
+        ${flash(124, 116)}`;
+    case 'Realme':
+      // Circle island with 3 vertical lenses
+      return `
+        <ellipse cx="62" cy="80" rx="32" ry="56" fill="rgba(0,0,0,.4)"/>
+        ${lens(62, 50, 13)} ${lens(62, 84, 13)} ${lens(62, 118, 11)}
+        ${flash(106, 50)}`;
+    case 'Motorola':
+      // Vertical pill with 2-3 lenses
+      return `
+        <rect x="46" y="36" width="44" height="110" rx="22" fill="rgba(0,0,0,.38)"/>
+        ${lens(68, 60, 14)} ${lens(68, 94, 14)} ${lens(68, 128, 10)}
+        ${flash(108, 60)}`;
+    case 'Nothing':
+      // Two distinct circles, transparent feel — minimalist
+      return `
+        ${lens(60, 50, 17)} ${lens(60, 96, 17)}
+        <circle cx="60" cy="50" r="6" fill="rgba(245,245,245,.95)"/>
+        <circle cx="60" cy="96" r="6" fill="rgba(245,245,245,.95)"/>
+        <rect x="40" y="140" width="80" height="2" rx="1" fill="rgba(245,245,245,.5)"/>
+        <rect x="40" y="148" width="56" height="2" rx="1" fill="rgba(245,245,245,.35)"/>`;
+    case 'Tecno':
+      // Square island with 4 lenses (camera-heavy)
+      return `
+        <rect x="34" y="34" width="92" height="92" rx="14" fill="rgba(0,0,0,.4)"/>
+        ${lens(60, 60, 14)} ${lens(100, 60, 14)} ${lens(60, 100, 14)} ${lens(100, 100, 10)}
+        ${flash(124, 130)}`;
+    default:
+      return `${lens(60, 50, 14)} ${lens(60, 86, 14)} ${lens(60, 122, 14)}`;
+  }
+}
+
+function svgBar(p) {
+  const [body, accent] = pickColors(p.brand, p.id || 0);
+  const cam = brandCamera(p.brand, accent);
+  return `<svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <linearGradient id="g${p.id}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="${body}"/>
+        <stop offset="1" stop-color="${shadeColor(body, -0.25)}"/>
+      </linearGradient>
+      <linearGradient id="r${p.id}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="rgba(255,255,255,.12)"/>
+        <stop offset=".5" stop-color="rgba(255,255,255,0)"/>
+        <stop offset="1" stop-color="rgba(0,0,0,.18)"/>
+      </linearGradient>
+    </defs>
+    <!-- phone body (back side) -->
+    <rect x="22" y="10" width="156" height="300" rx="28" fill="url(#g${p.id})"/>
+    <rect x="22" y="10" width="156" height="300" rx="28" fill="url(#r${p.id})"/>
+    <rect x="22" y="10" width="156" height="300" rx="28" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="1"/>
+    <!-- camera island offset to top-left -->
+    <g transform="translate(0, 0)">
+      ${cam}
+    </g>
+    <!-- brand wordmark, subtle, lower-middle -->
+    <text x="100" y="285" font-family="Poppins, Inter, sans-serif" font-size="13" font-weight="700"
+          fill="${accent}" text-anchor="middle" opacity=".85" letter-spacing="2">
+      ${p.brand.toUpperCase()}
+    </text>
   </svg>`;
+}
+
+function svgFold(p) {
+  const [body, accent] = pickColors(p.brand, p.id || 0);
+  const cam = brandCamera(p.brand, accent);
+  // Open book: left panel showing back (with cameras + screen on right panel)
+  return `<svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <linearGradient id="gf${p.id}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="${body}"/>
+        <stop offset="1" stop-color="${shadeColor(body, -0.22)}"/>
+      </linearGradient>
+      <linearGradient id="gs${p.id}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#0B0F1A"/>
+        <stop offset="1" stop-color="#1F2937"/>
+      </linearGradient>
+    </defs>
+    <!-- left panel (back of phone) -->
+    <rect x="18" y="20" width="140" height="240" rx="14" fill="url(#gf${p.id})"/>
+    <rect x="18" y="20" width="140" height="240" rx="14" fill="none" stroke="rgba(0,0,0,.2)"/>
+    <g transform="translate(-10, 30) scale(.85)">${cam}</g>
+    <!-- hinge -->
+    <rect x="158" y="22" width="4" height="236" fill="rgba(0,0,0,.3)"/>
+    <!-- right panel (inner screen) -->
+    <rect x="162" y="20" width="140" height="240" rx="14" fill="url(#gs${p.id})"/>
+    <rect x="162" y="20" width="140" height="240" rx="14" fill="none" stroke="rgba(0,0,0,.2)"/>
+    <!-- screen content -->
+    <rect x="172" y="36" width="120" height="56" rx="10" fill="rgba(255,255,255,.06)"/>
+    <rect x="172" y="100" width="56" height="56" rx="10" fill="${accent}" opacity=".85"/>
+    <rect x="236" y="100" width="56" height="56" rx="10" fill="rgba(255,255,255,.08)"/>
+    <rect x="172" y="164" width="120" height="40" rx="10" fill="rgba(255,255,255,.05)"/>
+    <text x="232" y="240" font-family="Poppins, Inter, sans-serif" font-size="10" font-weight="700"
+          fill="rgba(255,255,255,.7)" text-anchor="middle" letter-spacing="2">${p.brand.toUpperCase()}</text>
+  </svg>`;
+}
+
+function svgFlip(p) {
+  const [body, accent] = pickColors(p.brand, p.id || 0);
+  const cam = brandCamera(p.brand, accent);
+  // Closed clamshell: small cover screen on top half, hinge mid, lower half closed
+  return `<svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <linearGradient id="gp${p.id}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="${body}"/>
+        <stop offset="1" stop-color="${shadeColor(body, -0.22)}"/>
+      </linearGradient>
+    </defs>
+    <!-- top half (with cover screen + cameras) -->
+    <rect x="22" y="10" width="156" height="150" rx="22" fill="url(#gp${p.id})"/>
+    <rect x="32" y="40" width="84" height="80" rx="10" fill="#0B0F1A"/>
+    <text x="74" y="86" font-family="Poppins" font-size="11" font-weight="700"
+          fill="rgba(255,255,255,.8)" text-anchor="middle">9:41</text>
+    <text x="74" y="104" font-family="Inter" font-size="8" fill="rgba(255,255,255,.55)" text-anchor="middle">Mon, May 19</text>
+    <!-- camera lenses on top-right -->
+    <circle cx="148" cy="56" r="10" fill="#0A0A0A"/><circle cx="148" cy="56" r="5" fill="#1F2A3A"/>
+    <circle cx="148" cy="86" r="10" fill="#0A0A0A"/><circle cx="148" cy="86" r="5" fill="#1F2A3A"/>
+    <!-- hinge gap -->
+    <rect x="22" y="160" width="156" height="6" fill="rgba(0,0,0,.3)"/>
+    <!-- bottom half -->
+    <rect x="22" y="166" width="156" height="146" rx="22" fill="url(#gp${p.id})"/>
+    <text x="100" y="280" font-family="Poppins" font-size="13" font-weight="700"
+          fill="${accent}" text-anchor="middle" opacity=".85" letter-spacing="2">${p.brand.toUpperCase()}</text>
+  </svg>`;
+}
+
+function shadeColor(hex, percent) {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.max(0, Math.min(255, (num >> 16) + Math.round(255 * percent)));
+  const g = Math.max(0, Math.min(255, ((num >> 8) & 0xff) + Math.round(255 * percent)));
+  const b = Math.max(0, Math.min(255, (num & 0xff) + Math.round(255 * percent)));
+  return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+}
+
+function phoneVisual(p) {
+  if (p.image_url) {
+    return `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy"/>`;
+  }
+  const ff = p.form_factor || 'bar';
+  if (ff === 'fold') return svgFold(p);
+  if (ff === 'flip') return svgFlip(p);
+  return svgBar(p);
 }
 
 function discountPct(price, mrp) {
@@ -40,30 +230,78 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+function specChip(label, icon) {
+  if (!label) return '';
+  return `<span class="spec-chip" title="${escapeHtml(label)}"><span class="spec-icon">${icon}</span>${escapeHtml(label)}</span>`;
+}
+
+const ICON = {
+  display:  '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/></svg>',
+  chip:     '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1"/><line x1="9" y1="2" x2="9" y2="6"/><line x1="15" y1="2" x2="15" y2="6"/><line x1="9" y1="18" x2="9" y2="22"/><line x1="15" y1="18" x2="15" y2="22"/><line x1="2" y1="9" x2="6" y2="9"/><line x1="2" y1="15" x2="6" y2="15"/><line x1="18" y1="9" x2="22" y2="9"/><line x1="18" y1="15" x2="22" y2="15"/></svg>',
+  camera:   '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  battery:  '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>',
+};
+
+function shortCamera(s) {
+  if (!s) return null;
+  // Take the first lens spec — e.g. "50MP + 50MP UW + 50MP Tele" -> "50MP triple"
+  const parts = s.split('+').map(x => x.trim());
+  const first = parts[0].match(/\d+MP/)?.[0] || parts[0];
+  const total = parts.length;
+  if (total >= 3) return `${first} triple`;
+  if (total === 2) return `${first} dual`;
+  return first;
+}
+
+function shortDisplay(s) {
+  if (!s) return null;
+  return s.split(' ').slice(0, 2).join(' ');
+}
+
+function shortProcessor(s) {
+  if (!s) return null;
+  // Shorten "Snapdragon 8 Elite for Galaxy" -> "SD 8 Elite"; "MediaTek Dimensity 9400" -> "Dimensity 9400"
+  return s
+    .replace(/^Snapdragon/, 'SD')
+    .replace(/^MediaTek\s+/, '')
+    .replace(/\s+for Galaxy$/, '')
+    .replace(/\s+Bionic$/, '');
+}
+
 function productCard(p) {
   const disc = discountPct(p.price_inr, p.mrp_inr);
   const title = `${p.name}${p.storage ? ' ' + p.storage : ''}`;
   const searchQ = p.flipkart_query || title;
   const waMsg = `Hi Namaskar Telecom, is the ${title} available?`;
+  const desc = p.description ? `<p class="product-desc">${escapeHtml(p.description)}</p>` : '';
+  const specs = `
+    <div class="spec-row">
+      ${specChip(shortDisplay(p.display), ICON.display)}
+      ${specChip(shortProcessor(p.processor), ICON.chip)}
+      ${specChip(shortCamera(p.main_camera), ICON.camera)}
+      ${specChip(p.battery, ICON.battery)}
+    </div>`;
   return `
     <article class="product-card" data-name="${escapeHtml(p.name)}" data-brand="${escapeHtml(p.brand)}" data-price="${p.price_inr}" data-new="${p.is_new}">
-      <div class="product-media">
+      <div class="product-media product-media-${p.form_factor || 'bar'}">
         ${p.is_new ? '<span class="product-tag new">New</span>' : ''}
+        ${disc ? `<span class="product-discount">-${disc}%</span>` : ''}
         <button class="product-fav" aria-label="Save">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         </button>
-        ${svgPhone(p.brand)}
+        ${phoneVisual(p)}
       </div>
       <div class="product-body">
         <span class="product-brand">${escapeHtml(p.brand)}</span>
         <h3 class="product-name">${escapeHtml(title)}</h3>
+        ${desc}
+        ${specs}
         <div class="product-price-row">
           <span class="price">${fmtPrice(p.price_inr)}</span>
           ${p.mrp_inr && p.mrp_inr > p.price_inr ? `<span class="price-old">${fmtPrice(p.mrp_inr)}</span>` : ''}
-          ${disc ? `<span class="discount">${disc}% OFF</span>` : ''}
         </div>
         <div class="product-actions">
-          <a href="${wa(waMsg)}" class="btn btn-primary" target="_blank" rel="noopener">Enquire</a>
+          <a href="${wa(waMsg)}" class="btn btn-primary" target="_blank" rel="noopener">Enquire on WhatsApp</a>
         </div>
         <div class="compare-row">
           <a href="${flipkart(searchQ)}" target="_blank" rel="noopener" class="compare-btn fk" title="See current Flipkart price">
@@ -85,7 +323,6 @@ function attachFavToggle(scope = document) {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       btn.classList.toggle('active');
-      btn.style.color = btn.classList.contains('active') ? '#E63946' : '';
     });
   });
 }
