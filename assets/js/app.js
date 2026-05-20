@@ -284,7 +284,7 @@ function productCard(p) {
       ${specChip(p.battery, ICON.battery)}
     </div>` : '';
   return `
-    <article class="product-card" data-name="${escapeHtml(p.name)}" data-brand="${escapeHtml(p.brand)}" data-category="${escapeHtml(p.category || 'smartphone')}" data-price="${p.price_inr}" data-new="${p.is_new}">
+    <article class="product-card" data-pkey="${productKey(p)}" data-name="${escapeHtml(p.name)}" data-brand="${escapeHtml(p.brand)}" data-category="${escapeHtml(p.category || 'smartphone')}" data-price="${p.price_inr}" data-new="${p.is_new}" tabindex="0" role="button" aria-label="View specifications for ${escapeHtml(title)}">
       <div class="product-media product-media-${p.form_factor || 'bar'}">
         ${p.is_new ? '<span class="product-tag new">New</span>' : ''}
         ${disc ? `<span class="product-discount">-${disc}%</span>` : ''}
@@ -303,6 +303,9 @@ function productCard(p) {
           ${p.mrp_inr && p.mrp_inr > p.price_inr ? `<span class="price-old">${fmtPrice(p.mrp_inr)}</span>` : ''}
         </div>
         <div class="product-actions">
+          <button type="button" class="btn btn-ghost product-view-btn" data-pkey="${productKey(p)}">View specs
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+          </button>
           <a href="${wa(waMsg)}" class="btn btn-primary" target="_blank" rel="noopener">Enquire on WhatsApp</a>
         </div>
         <div class="compare-row">
@@ -320,13 +323,146 @@ function productCard(p) {
   `;
 }
 
+const productKey = (p) => `${p.brand}|||${p.name}`;
+
 function attachFavToggle(scope = document) {
   scope.querySelectorAll('.product-fav').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       btn.classList.toggle('active');
     });
   });
+}
+
+function wireCardClicks(scope, productList) {
+  const openFor = (key) => {
+    const p = productList.find((x) => productKey(x) === key);
+    if (p) openProductModal(p);
+  };
+  scope.querySelectorAll('.product-card').forEach((card) => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a, button')) return;
+      openFor(card.dataset.pkey);
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        if (e.target.closest('a, button')) return;
+        e.preventDefault();
+        openFor(card.dataset.pkey);
+      }
+    });
+  });
+  scope.querySelectorAll('.product-view-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openFor(btn.dataset.pkey);
+    });
+  });
+}
+
+function ensureModalRoot() {
+  let root = document.getElementById('product-modal');
+  if (root) return root;
+  root = document.createElement('div');
+  root.id = 'product-modal';
+  root.className = 'pm-backdrop';
+  root.setAttribute('aria-hidden', 'true');
+  root.innerHTML = `
+    <div class="pm-dialog" role="dialog" aria-modal="true" aria-labelledby="pm-title">
+      <button class="pm-close" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+      <div class="pm-content"></div>
+    </div>`;
+  document.body.appendChild(root);
+  root.addEventListener('click', (e) => {
+    if (e.target === root || e.target.closest('.pm-close')) closeProductModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && root.classList.contains('open')) closeProductModal();
+  });
+  return root;
+}
+
+function specRow(label, value) {
+  if (!value) return '';
+  return `<div class="pm-spec"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`;
+}
+
+function buildModalBody(p) {
+  const title = `${p.name}${p.storage ? ' ' + p.storage : ''}`;
+  const searchQ = p.flipkart_query || title;
+  const waMsg = `Hi Namaskar Telecom, I'd like more details on the ${title}.`;
+  const disc = discountPct(p.price_inr, p.mrp_inr);
+  const isPhone = (p.category || 'smartphone') === 'smartphone';
+
+  // Description can be "Lead sentence. Highlights: A | B | C." — split the highlights into chips.
+  let lede = p.description || '';
+  let highlights = [];
+  const m = lede.match(/^(.*?)\s*Highlights:\s*(.+?)\.?\s*$/i);
+  if (m) {
+    lede = m[1].trim();
+    highlights = m[2].split('|').map((s) => s.trim()).filter(Boolean);
+  }
+
+  const phoneSpecs = isPhone ? `
+    <dl class="pm-specs">
+      ${specRow('Display', p.display)}
+      ${specRow('Chipset', p.processor)}
+      ${specRow('Main camera', p.main_camera)}
+      ${specRow('Battery', p.battery)}
+      ${specRow('Storage', p.storage)}
+      ${specRow('RAM', p.ram)}
+    </dl>` : '';
+
+  const highlightChips = highlights.length ? `
+    <div class="pm-highlights">
+      ${highlights.map((h) => `<span class="pm-chip">${escapeHtml(h)}</span>`).join('')}
+    </div>` : '';
+
+  return `
+    <div class="pm-media">
+      ${p.image_url
+        ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" referrerpolicy="no-referrer" loading="eager" />`
+        : '<div class="pm-noimg">No image available</div>'}
+    </div>
+    <div class="pm-info">
+      <div class="pm-brand">${escapeHtml(p.brand)}</div>
+      <h2 id="pm-title" class="pm-name">${escapeHtml(title)}</h2>
+      ${lede ? `<p class="pm-desc">${escapeHtml(lede)}</p>` : ''}
+      <div class="pm-price-row">
+        <span class="pm-price">${fmtPrice(p.price_inr)}</span>
+        ${p.mrp_inr && p.mrp_inr > p.price_inr ? `<span class="pm-price-old">${fmtPrice(p.mrp_inr)}</span>` : ''}
+        ${disc ? `<span class="pm-discount">Save ${disc}%</span>` : ''}
+      </div>
+      ${highlightChips}
+      ${phoneSpecs}
+      <div class="pm-actions">
+        <a href="${wa(waMsg)}" target="_blank" rel="noopener" class="btn btn-primary">Enquire on WhatsApp</a>
+        <a href="${flipkart(searchQ)}" target="_blank" rel="noopener" class="btn btn-ghost">Check Flipkart price</a>
+        <a href="${amazon(searchQ)}" target="_blank" rel="noopener" class="btn btn-ghost">Check Amazon price</a>
+      </div>
+      <p class="pm-fineprint">Prices include GST. Walk in to compare hands-on, or message us to confirm availability before you visit.</p>
+    </div>`;
+}
+
+function openProductModal(p) {
+  const root = ensureModalRoot();
+  root.querySelector('.pm-content').innerHTML = buildModalBody(p);
+  root.classList.add('open');
+  root.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('pm-locked');
+  root.querySelector('.pm-close')?.focus();
+}
+
+function closeProductModal() {
+  const root = document.getElementById('product-modal');
+  if (!root) return;
+  root.classList.remove('open');
+  root.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('pm-locked');
 }
 
 function getCategoryFromUrl() {
@@ -384,6 +520,7 @@ function renderCatalog(items) {
   }
   grid.innerHTML = items.map(productCard).join('');
   attachFavToggle(grid);
+  wireCardClicks(grid, items);
 }
 
 function attachFilters(allProducts, initialCategory = 'all') {
@@ -453,6 +590,7 @@ async function loadFeatured() {
 
   grid.innerHTML = data.map(productCard).join('');
   attachFavToggle(grid);
+  wireCardClicks(grid, data);
 }
 
 function wireContactForm() {
