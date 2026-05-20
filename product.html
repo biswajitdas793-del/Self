@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Products — Namaskar Telecom</title>
-<meta name="description" content="Browse our full range of smartphones, tablets, smartwatches and accessories from Apple, Samsung, OnePlus, Xiaomi, Vivo, OPPO, Realme and more." />
+<title id="page-title">Product — Namaskar Telecom</title>
+<meta name="description" content="Product specifications, colour and storage options at Namaskar Telecom — genuine, India warranty, easy EMI." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
@@ -49,53 +49,16 @@
   </div>
 </header>
 
-<!-- Page head -->
-<section class="page-head">
+<main class="pdp-page">
   <div class="container">
-    <div class="crumbs"><a href="index.html">Home</a> &nbsp;/&nbsp; Products</div>
-    <h1 id="page-title">All Products</h1>
-    <p style="max-width: 640px; color: var(--muted);">200+ models across mobiles, TWS earbuds, headphones and smartwatches. Walk in to compare hands-on, or message us on WhatsApp to confirm availability.</p>
-    <div class="cat-tabs" id="cat-tabs" role="tablist">
-      <a href="products.html" class="cat-pill" data-cat="all">All</a>
-      <a href="products.html?category=smartphone" class="cat-pill" data-cat="smartphone">Mobiles</a>
-      <a href="products.html?category=tws" class="cat-pill" data-cat="tws">TWS</a>
-      <a href="products.html?category=headphones" class="cat-pill" data-cat="headphones">Headphones</a>
-      <a href="products.html?category=smartwatches" class="cat-pill" data-cat="smartwatches">Smartwatches</a>
+    <div class="crumbs" id="pdp-crumbs"><a href="index.html">Home</a> &nbsp;/&nbsp; <a href="products.html">Products</a></div>
+    <div id="pdp-root" class="pdp-root">
+      <div class="catalog-loading" style="padding:80px 0;">Loading product…</div>
     </div>
   </div>
-</section>
+</main>
 
-<section class="section">
-  <div class="container">
-
-    <!-- Filters -->
-    <div class="filters">
-      <input type="search" id="search" placeholder="Search by model or brand (eg. iPhone, AirPods, Watch)…" />
-      <select id="brand">
-        <option value="all">All brands</option>
-      </select>
-      <select id="sort">
-        <option value="featured">Sort: Featured</option>
-        <option value="new">Newest first</option>
-        <option value="low">Price: low to high</option>
-        <option value="high">Price: high to low</option>
-      </select>
-    </div>
-
-    <!-- Product grid (populated dynamically from Supabase) -->
-    <div class="product-grid" id="product-grid">
-      <div class="catalog-loading">Loading catalogue…</div>
-    </div>
-
-    <p style="text-align:center; color: var(--muted); margin-top: 30px; font-size: .9rem;">
-      Live in-store stock. Prices include GST. Use the Flipkart / Amazon links to compare — we usually match or beat them.
-    </p>
-
-  </div>
-</section>
-
-
-<!-- Footer (same as home) -->
+<!-- Footer (same as other pages) -->
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">
@@ -103,7 +66,7 @@
         <div class="logo footer-logo"><div class="logo-mark">N</div><div class="logo-text"><strong>Namaskar Telecom</strong><small>Mobile · Accessories · Service</small></div></div>
         <p style="margin-top: 16px; max-width: 320px;">Your trusted neighbourhood mobile store — genuine phones, honest pricing, and after-sales care since 2012.</p>
       </div>
-      <div><h4>Shop</h4><ul><li><a href="products.html">All Phones</a></li><li><a href="products.html">Accessories</a></li><li><a href="offers.html">Offers</a></li><li><a href="products.html">Smartwatches</a></li></ul></div>
+      <div><h4>Shop</h4><ul><li><a href="products.html?category=smartphone">Mobiles</a></li><li><a href="products.html?category=tws">TWS Earbuds</a></li><li><a href="products.html?category=headphones">Headphones</a></li><li><a href="products.html?category=smartwatches">Smartwatches</a></li></ul></div>
       <div><h4>Company</h4><ul><li><a href="about.html">About us</a></li><li><a href="contact.html">Contact</a></li><li><a href="contact.html">Service & support</a></li><li><a href="#">Privacy policy</a></li></ul></div>
       <div><h4>Visit us</h4>
         <ul class="footer-contact">
@@ -115,7 +78,7 @@
     </div>
     <div class="footer-bottom">
       <span>&copy; <span id="year"></span> Namaskar Telecom. All rights reserved.</span>
-      <span>Designed for the people of our neighbourhood ❤</span>
+      <span>Designed for the people of our neighbourhood</span>
     </div>
   </div>
 </footer>

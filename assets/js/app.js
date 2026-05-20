@@ -284,7 +284,7 @@ function productCard(p) {
       ${specChip(p.battery, ICON.battery)}
     </div>` : '';
   return `
-    <article class="product-card" data-pkey="${productKey(p)}" data-name="${escapeHtml(p.name)}" data-brand="${escapeHtml(p.brand)}" data-category="${escapeHtml(p.category || 'smartphone')}" data-price="${p.price_inr}" data-new="${p.is_new}" tabindex="0" role="button" aria-label="View specifications for ${escapeHtml(title)}">
+    <article class="product-card" data-pid="${p.id}" data-pkey="${productKey(p)}" data-name="${escapeHtml(p.name)}" data-brand="${escapeHtml(p.brand)}" data-category="${escapeHtml(p.category || 'smartphone')}" data-price="${p.price_inr}" data-new="${p.is_new}" tabindex="0" role="link" aria-label="View specifications for ${escapeHtml(title)}">
       <div class="product-media product-media-${p.form_factor || 'bar'}">
         ${p.is_new ? '<span class="product-tag new">New</span>' : ''}
         ${disc ? `<span class="product-discount">-${disc}%</span>` : ''}
@@ -303,9 +303,9 @@ function productCard(p) {
           ${p.mrp_inr && p.mrp_inr > p.price_inr ? `<span class="price-old">${fmtPrice(p.mrp_inr)}</span>` : ''}
         </div>
         <div class="product-actions">
-          <button type="button" class="btn btn-ghost product-view-btn" data-pkey="${productKey(p)}">View specs
+          <a href="product.html?id=${p.id}" class="btn btn-ghost product-view-btn">View specs
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
-          </button>
+          </a>
           <a href="${wa(waMsg)}" class="btn btn-primary" target="_blank" rel="noopener">Enquire on WhatsApp</a>
         </div>
         <div class="compare-row">
@@ -335,29 +335,22 @@ function attachFavToggle(scope = document) {
   });
 }
 
-function wireCardClicks(scope, productList) {
-  const openFor = (key) => {
-    const p = productList.find((x) => productKey(x) === key);
-    if (p) openProductModal(p);
-  };
+function wireCardClicks(scope /*, productList */) {
+  // Navigate to the dedicated product page. Buttons and inner links
+  // (WhatsApp / Flipkart / Amazon / View specs) stop propagation so they
+  // continue to work as their own targets.
+  const go = (id) => { if (id) window.location.href = `product.html?id=${id}`; };
   scope.querySelectorAll('.product-card').forEach((card) => {
     card.addEventListener('click', (e) => {
       if (e.target.closest('a, button')) return;
-      openFor(card.dataset.pkey);
+      go(card.dataset.pid);
     });
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         if (e.target.closest('a, button')) return;
         e.preventDefault();
-        openFor(card.dataset.pkey);
+        go(card.dataset.pid);
       }
-    });
-  });
-  scope.querySelectorAll('.product-view-btn').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      openFor(btn.dataset.pkey);
     });
   });
 }
@@ -695,9 +688,189 @@ function wireBaseInteractions() {
   attachFavToggle();
 }
 
+// ===== Product detail page (product.html) =====
+async function loadProductDetail() {
+  const root = document.getElementById('pdp-root');
+  if (!root) return;
+  const params = new URLSearchParams(window.location.search);
+  const id = parseInt(params.get('id'), 10);
+  if (!id) {
+    root.innerHTML = '<div class="catalog-error">No product specified. <a href="products.html">Browse all products</a></div>';
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error('PDP error:', error);
+    root.innerHTML = '<div class="catalog-error">We couldn\'t find that product. <a href="products.html">Browse all products</a></div>';
+    return;
+  }
+
+  renderProductDetail(data);
+}
+
+function categoryLabel(cat) {
+  return CATEGORY_LABELS[cat] || 'Products';
+}
+
+function renderProductDetail(p) {
+  const title = `${p.brand} ${p.name}`;
+  document.title = `${title} — Namaskar Telecom`;
+  const crumbs = document.getElementById('pdp-crumbs');
+  if (crumbs) {
+    const catUrl = `products.html?category=${encodeURIComponent(p.category || 'smartphone')}`;
+    crumbs.innerHTML = `<a href="index.html">Home</a> &nbsp;/&nbsp; <a href="products.html">Products</a> &nbsp;/&nbsp; <a href="${catUrl}">${escapeHtml(categoryLabel(p.category))}</a> &nbsp;/&nbsp; <span>${escapeHtml(p.name)}</span>`;
+  }
+
+  const gallery = (p.gallery_urls && p.gallery_urls.length) ? p.gallery_urls : (p.image_url ? [p.image_url] : []);
+  const colors = Array.isArray(p.color_options) ? p.color_options : [];
+  const storage = Array.isArray(p.storage_options) ? p.storage_options : [];
+  const highlights = Array.isArray(p.highlights) ? p.highlights : [];
+  const specs = p.detailed_specs && typeof p.detailed_specs === 'object' ? p.detailed_specs : {};
+
+  const disc = discountPct(p.price_inr, p.mrp_inr);
+  const saveAmt = (p.mrp_inr && p.mrp_inr > p.price_inr) ? (p.mrp_inr - p.price_inr) : 0;
+  const waMsg = `Hi Namaskar Telecom, I'd like more details on the ${p.brand} ${p.name}.`;
+  const searchQ = p.flipkart_query || `${p.brand} ${p.name}`;
+
+  const galleryHtml = gallery.length ? `
+    <div class="pdp-gallery">
+      <div class="pdp-stage">
+        <img id="pdp-main-img" src="${escapeHtml(gallery[0])}" alt="${escapeHtml(title)}" referrerpolicy="no-referrer" loading="eager" />
+      </div>
+      ${gallery.length > 1 ? `
+        <div class="pdp-thumbs">
+          ${gallery.map((src, i) => `
+            <button class="pdp-thumb ${i === 0 ? 'active' : ''}" data-src="${escapeHtml(src)}" aria-label="View image ${i + 1}">
+              <img src="${escapeHtml(src)}" alt="" referrerpolicy="no-referrer" loading="lazy" />
+            </button>`).join('')}
+        </div>` : ''}
+    </div>` : `<div class="pdp-gallery"><div class="pdp-stage"><div class="pdp-noimg">No image available</div></div></div>`;
+
+  const colorsHtml = colors.length ? `
+    <section class="pdp-section">
+      <h3 class="pdp-section-title">Colour <span class="pdp-section-value" id="pdp-color-name">${escapeHtml(colors[0].name || '')}</span></h3>
+      <div class="pdp-swatches">
+        ${colors.map((c, i) => `
+          <button class="pdp-swatch ${i === 0 ? 'active' : ''}" data-name="${escapeHtml(c.name || '')}" aria-label="${escapeHtml(c.name || '')}" title="${escapeHtml(c.name || '')}">
+            <span class="pdp-swatch-dot" style="background:${escapeHtml(c.hex || '#999')}"></span>
+            <span class="pdp-swatch-label">${escapeHtml(c.name || '')}</span>
+          </button>`).join('')}
+      </div>
+    </section>` : '';
+
+  const storageHtml = storage.length ? `
+    <section class="pdp-section">
+      <h3 class="pdp-section-title">Storage <span class="pdp-section-value" id="pdp-storage-label">${escapeHtml(storage[0].label || '')}</span></h3>
+      <div class="pdp-chips">
+        ${storage.map((s, i) => `
+          <button class="pdp-chip ${i === 0 ? 'active' : ''}" data-label="${escapeHtml(s.label || '')}">${escapeHtml(s.label || '')}</button>`).join('')}
+      </div>
+    </section>` : '';
+
+  const offersHtml = `
+    <section class="pdp-offers">
+      <div class="pdp-offer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><strong>No-cost EMI</strong><span>From ₹999/month on leading bank cards</span></div></div>
+      <div class="pdp-offer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12c0 1.7-.7 3.3-2 4.5L12 22l-7-5.5C3.7 15.3 3 13.7 3 12c0-5 4-9 9-9s9 4 9 9z"/></svg><div><strong>Instant exchange</strong><span>Trade in your old phone for immediate value</span></div></div>
+      <div class="pdp-offer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><div><strong>100% genuine, GST invoice</strong><span>India warranty, sealed-box from authorised distributors</span></div></div>
+    </section>`;
+
+  const highlightsHtml = highlights.length ? `
+    <section class="pdp-section">
+      <h3 class="pdp-section-title">Highlights</h3>
+      <ul class="pdp-highlights">
+        ${highlights.map((h) => `<li>${escapeHtml(String(h))}</li>`).join('')}
+      </ul>
+    </section>` : '';
+
+  const specSections = Object.entries(specs);
+  const specsHtml = specSections.length ? `
+    <section class="pdp-specs-wrap">
+      <h2 class="pdp-h2">Specifications</h2>
+      <div class="pdp-specs-grid">
+        ${specSections.map(([section, rows]) => `
+          <div class="pdp-spec-section">
+            <h3>${escapeHtml(section)}</h3>
+            <table>
+              <tbody>
+                ${(Array.isArray(rows) ? rows : []).map((r) => {
+                  const [label, value] = Array.isArray(r) ? r : [r, ''];
+                  return `<tr><th>${escapeHtml(String(label))}</th><td>${escapeHtml(String(value))}</td></tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`).join('')}
+      </div>
+    </section>` : '';
+
+  const root = document.getElementById('pdp-root');
+  root.innerHTML = `
+    <div class="pdp-top">
+      ${galleryHtml}
+      <div class="pdp-info">
+        <div class="pdp-brand">${escapeHtml(p.brand)}</div>
+        <h1 class="pdp-name">${escapeHtml(p.name)}</h1>
+        <div class="pdp-price-row">
+          <span class="pdp-price">${fmtPrice(p.price_inr)}</span>
+          ${p.mrp_inr && p.mrp_inr > p.price_inr ? `<span class="pdp-price-old">${fmtPrice(p.mrp_inr)}</span>` : ''}
+          ${disc ? `<span class="pdp-discount">${disc}% off</span>` : ''}
+        </div>
+        ${saveAmt > 0 ? `<div class="pdp-save">You save ${fmtPrice(saveAmt)} on MRP</div>` : ''}
+        ${colorsHtml}
+        ${storageHtml}
+        ${offersHtml}
+        ${highlightsHtml}
+        <div class="pdp-actions">
+          <a href="${wa(waMsg)}" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Enquire on WhatsApp</a>
+          <a href="${flipkart(searchQ)}" target="_blank" rel="noopener" class="btn btn-ghost">Compare on Flipkart</a>
+          <a href="${amazon(searchQ)}" target="_blank" rel="noopener" class="btn btn-ghost">Compare on Amazon</a>
+        </div>
+        <p class="pdp-fineprint">Walk in to compare hands-on, or message us on WhatsApp to confirm availability before you visit. Prices include GST.</p>
+      </div>
+    </div>
+    ${specsHtml}
+  `;
+
+  // Wire up gallery thumbnails
+  const mainImg = document.getElementById('pdp-main-img');
+  root.querySelectorAll('.pdp-thumb').forEach((t) => {
+    t.addEventListener('click', () => {
+      root.querySelectorAll('.pdp-thumb').forEach((x) => x.classList.remove('active'));
+      t.classList.add('active');
+      if (mainImg) mainImg.src = t.dataset.src;
+    });
+  });
+
+  // Wire up colour swatches (visual selection + name label update)
+  const colorName = document.getElementById('pdp-color-name');
+  root.querySelectorAll('.pdp-swatch').forEach((sw) => {
+    sw.addEventListener('click', () => {
+      root.querySelectorAll('.pdp-swatch').forEach((x) => x.classList.remove('active'));
+      sw.classList.add('active');
+      if (colorName) colorName.textContent = sw.dataset.name || '';
+    });
+  });
+
+  // Wire up storage chips
+  const storageLabel = document.getElementById('pdp-storage-label');
+  root.querySelectorAll('.pdp-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      root.querySelectorAll('.pdp-chip').forEach((x) => x.classList.remove('active'));
+      chip.classList.add('active');
+      if (storageLabel) storageLabel.textContent = chip.dataset.label || '';
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   wireBaseInteractions();
   loadFullCatalog();
   loadFeatured();
+  loadProductDetail();
   wireContactForm();
 });
