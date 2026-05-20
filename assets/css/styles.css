@@ -889,6 +889,30 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
   top: -60px; right: -60px;
   opacity: .12;
 }
+.about-banner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+.about-product {
+  position: absolute;
+  margin: 0;
+  filter: drop-shadow(0 18px 26px rgba(20,17,15,.20));
+  transition: transform .25s ease;
+}
+.about-product img { width: 100%; height: 100%; object-fit: contain; }
+.about-product:hover { transform: translateY(-4px); }
+.ab-iphone  { top: 8%;  left: 22%;  width: 46%;  z-index: 3; transform: rotate(-4deg); }
+.ab-samsung { top: 18%; left: 50%;  width: 40%;  z-index: 2; transform: rotate(7deg); }
+.ab-airpods { bottom: 4%; left: 6%;  width: 30%; z-index: 4; }
+.ab-watch   { bottom: 10%; right: 6%; width: 28%; z-index: 4; transform: rotate(5deg); }
+@media (max-width: 720px) {
+  .ab-iphone  { top: 4%;  left: 18%; width: 52%; }
+  .ab-samsung { top: 14%; left: 50%; width: 42%; }
+  .ab-airpods { bottom: 2%; left: 4%;  width: 32%; }
+  .ab-watch   { bottom: 8%; right: 4%; width: 30%; }
+}
 .about-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

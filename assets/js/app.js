@@ -735,8 +735,13 @@ function renderProductDetail(p) {
   const highlights = Array.isArray(p.highlights) ? p.highlights : [];
   const specs = p.detailed_specs && typeof p.detailed_specs === 'object' ? p.detailed_specs : {};
 
-  const disc = discountPct(p.price_inr, p.mrp_inr);
-  const saveAmt = (p.mrp_inr && p.mrp_inr > p.price_inr) ? (p.mrp_inr - p.price_inr) : 0;
+  // Active variant pricing — defaults to first storage option when present,
+  // otherwise falls back to the catalogue base price.
+  const initialVariant = storage.length && (storage[0].price_inr || storage[0].mrp_inr)
+    ? { price_inr: storage[0].price_inr || p.price_inr, mrp_inr: storage[0].mrp_inr || p.mrp_inr }
+    : { price_inr: p.price_inr, mrp_inr: p.mrp_inr };
+  const disc = discountPct(initialVariant.price_inr, initialVariant.mrp_inr);
+  const saveAmt = (initialVariant.mrp_inr && initialVariant.mrp_inr > initialVariant.price_inr) ? (initialVariant.mrp_inr - initialVariant.price_inr) : 0;
   const waMsg = `Hi Namaskar Telecom, I'd like more details on the ${p.brand} ${p.name}.`;
   const searchQ = p.flipkart_query || `${p.brand} ${p.name}`;
 
@@ -771,7 +776,7 @@ function renderProductDetail(p) {
       <h3 class="pdp-section-title">Storage <span class="pdp-section-value" id="pdp-storage-label">${escapeHtml(storage[0].label || '')}</span></h3>
       <div class="pdp-chips">
         ${storage.map((s, i) => `
-          <button class="pdp-chip ${i === 0 ? 'active' : ''}" data-label="${escapeHtml(s.label || '')}">${escapeHtml(s.label || '')}</button>`).join('')}
+          <button class="pdp-chip ${i === 0 ? 'active' : ''}" data-idx="${i}" data-label="${escapeHtml(s.label || '')}" data-price="${s.price_inr || ''}" data-mrp="${s.mrp_inr || ''}">${escapeHtml(s.label || '')}</button>`).join('')}
       </div>
     </section>` : '';
 
@@ -818,11 +823,11 @@ function renderProductDetail(p) {
         <div class="pdp-brand">${escapeHtml(p.brand)}</div>
         <h1 class="pdp-name">${escapeHtml(p.name)}</h1>
         <div class="pdp-price-row">
-          <span class="pdp-price">${fmtPrice(p.price_inr)}</span>
-          ${p.mrp_inr && p.mrp_inr > p.price_inr ? `<span class="pdp-price-old">${fmtPrice(p.mrp_inr)}</span>` : ''}
-          ${disc ? `<span class="pdp-discount">${disc}% off</span>` : ''}
+          <span class="pdp-price" id="pdp-price">${fmtPrice(initialVariant.price_inr)}</span>
+          <span class="pdp-price-old" id="pdp-price-old"${initialVariant.mrp_inr && initialVariant.mrp_inr > initialVariant.price_inr ? '' : ' hidden'}>${initialVariant.mrp_inr ? fmtPrice(initialVariant.mrp_inr) : ''}</span>
+          <span class="pdp-discount" id="pdp-discount"${disc ? '' : ' hidden'}>${disc ? `${disc}% off` : ''}</span>
         </div>
-        ${saveAmt > 0 ? `<div class="pdp-save">You save ${fmtPrice(saveAmt)} on MRP</div>` : ''}
+        <div class="pdp-save" id="pdp-save"${saveAmt > 0 ? '' : ' hidden'}>${saveAmt > 0 ? `You save ${fmtPrice(saveAmt)} on MRP` : ''}</div>
         ${colorsHtml}
         ${storageHtml}
         ${offersHtml}
@@ -858,13 +863,33 @@ function renderProductDetail(p) {
     });
   });
 
-  // Wire up storage chips
+  // Wire up storage chips (also recomputes the price block so users see the
+  // 256 GB / 512 GB / 1 TB / 2 TB pricing change live)
   const storageLabel = document.getElementById('pdp-storage-label');
+  const priceEl = document.getElementById('pdp-price');
+  const priceOldEl = document.getElementById('pdp-price-old');
+  const discountEl = document.getElementById('pdp-discount');
+  const saveEl = document.getElementById('pdp-save');
   root.querySelectorAll('.pdp-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       root.querySelectorAll('.pdp-chip').forEach((x) => x.classList.remove('active'));
       chip.classList.add('active');
       if (storageLabel) storageLabel.textContent = chip.dataset.label || '';
+      const price = parseInt(chip.dataset.price, 10);
+      const mrp = parseInt(chip.dataset.mrp, 10);
+      if (priceEl && Number.isFinite(price)) priceEl.textContent = fmtPrice(price);
+      if (priceOldEl) {
+        if (Number.isFinite(mrp) && mrp > price) { priceOldEl.textContent = fmtPrice(mrp); priceOldEl.hidden = false; }
+        else { priceOldEl.hidden = true; }
+      }
+      if (discountEl) {
+        const d = (Number.isFinite(mrp) && mrp > price) ? Math.round(((mrp - price) / mrp) * 100) : 0;
+        if (d > 0) { discountEl.textContent = `${d}% off`; discountEl.hidden = false; } else { discountEl.hidden = true; }
+      }
+      if (saveEl) {
+        if (Number.isFinite(mrp) && mrp > price) { saveEl.textContent = `You save ${fmtPrice(mrp - price)} on MRP`; saveEl.hidden = false; }
+        else { saveEl.hidden = true; }
+      }
     });
   });
 }
