@@ -742,13 +742,21 @@ function renderProductDetail(p) {
     : { price_inr: p.price_inr, mrp_inr: p.mrp_inr };
   const disc = discountPct(initialVariant.price_inr, initialVariant.mrp_inr);
   const saveAmt = (initialVariant.mrp_inr && initialVariant.mrp_inr > initialVariant.price_inr) ? (initialVariant.mrp_inr - initialVariant.price_inr) : 0;
-  const waMsg = `Hi Namaskar Telecom, I'd like more details on the ${p.brand} ${p.name}.`;
+  const buildWaMsg = ({ colour, storage } = {}) => {
+    const parts = [`Hi Namaskar Telecom, I'd like the ${p.brand} ${p.name}`];
+    if (colour) parts.push(`in ${colour}`);
+    if (storage) parts.push(`with ${storage}`);
+    return parts.join(' ') + '.';
+  };
+  const initialColour = colors[0]?.name || '';
+  const initialStorage = storage[0]?.label || '';
+  const waMsg = buildWaMsg({ colour: initialColour, storage: initialStorage });
   const searchQ = p.flipkart_query || `${p.brand} ${p.name}`;
 
   const galleryHtml = gallery.length ? `
     <div class="pdp-gallery">
       <div class="pdp-stage">
-        <img id="pdp-main-img" src="${escapeHtml(gallery[0])}" alt="${escapeHtml(title)}" referrerpolicy="no-referrer" loading="eager" />
+        <img id="pdp-main-img" src="${escapeHtml(gallery[0])}" alt="${escapeHtml(title)}" referrerpolicy="no-referrer" loading="eager" data-fallback="${escapeHtml(gallery[0])}" onerror="if(this.src!==this.dataset.fallback){this.src=this.dataset.fallback;}" />
       </div>
       ${gallery.length > 1 ? `
         <div class="pdp-thumbs">
@@ -764,7 +772,7 @@ function renderProductDetail(p) {
       <h3 class="pdp-section-title">Colour <span class="pdp-section-value" id="pdp-color-name">${escapeHtml(colors[0].name || '')}</span></h3>
       <div class="pdp-swatches">
         ${colors.map((c, i) => `
-          <button class="pdp-swatch ${i === 0 ? 'active' : ''}" data-name="${escapeHtml(c.name || '')}" aria-label="${escapeHtml(c.name || '')}" title="${escapeHtml(c.name || '')}">
+          <button class="pdp-swatch ${i === 0 ? 'active' : ''}" data-name="${escapeHtml(c.name || '')}" data-image="${escapeHtml(c.image_url || '')}" aria-label="${escapeHtml(c.name || '')}" title="${escapeHtml(c.name || '')}">
             <span class="pdp-swatch-dot" style="background:${escapeHtml(c.hex || '#999')}"></span>
             <span class="pdp-swatch-label">${escapeHtml(c.name || '')}</span>
           </button>`).join('')}
@@ -833,7 +841,7 @@ function renderProductDetail(p) {
         ${offersHtml}
         ${highlightsHtml}
         <div class="pdp-actions">
-          <a href="${wa(waMsg)}" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Enquire on WhatsApp</a>
+          <a id="pdp-wa" href="${wa(waMsg)}" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Enquire on WhatsApp</a>
           <a href="${flipkart(searchQ)}" target="_blank" rel="noopener" class="btn btn-ghost">Compare on Flipkart</a>
           <a href="${amazon(searchQ)}" target="_blank" rel="noopener" class="btn btn-ghost">Compare on Amazon</a>
         </div>
@@ -853,13 +861,30 @@ function renderProductDetail(p) {
     });
   });
 
-  // Wire up colour swatches (visual selection + name label update)
+  // Helpers that re-read the live selection from the DOM and rebuild the
+  // WhatsApp message link. No separate state vars — DOM is the source of truth.
+  const waAnchor = document.getElementById('pdp-wa');
+  const updateWa = () => {
+    if (!waAnchor) return;
+    const colour = root.querySelector('.pdp-swatch.active')?.dataset.name || '';
+    const storageLbl = root.querySelector('.pdp-chip.active')?.dataset.label || '';
+    waAnchor.href = wa(buildWaMsg({ colour, storage: storageLbl }));
+  };
+
+  // Wire up colour swatches (selection highlight + name label + optional
+  // per-colour image swap + WhatsApp message rebuild)
   const colorName = document.getElementById('pdp-color-name');
+  const fallbackImg = gallery[0] || '';
   root.querySelectorAll('.pdp-swatch').forEach((sw) => {
     sw.addEventListener('click', () => {
       root.querySelectorAll('.pdp-swatch').forEach((x) => x.classList.remove('active'));
       sw.classList.add('active');
       if (colorName) colorName.textContent = sw.dataset.name || '';
+      if (mainImg) {
+        const colourImg = sw.dataset.image || '';
+        mainImg.src = colourImg || fallbackImg;
+      }
+      updateWa();
     });
   });
 
@@ -890,6 +915,7 @@ function renderProductDetail(p) {
         if (Number.isFinite(mrp) && mrp > price) { saveEl.textContent = `You save ${fmtPrice(mrp - price)} on MRP`; saveEl.hidden = false; }
         else { saveEl.hidden = true; }
       }
+      updateWa();
     });
   });
 }
