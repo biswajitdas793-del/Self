@@ -533,7 +533,8 @@ async function loadFullCatalog() {
 
   if (error || !data) {
     console.error('Supabase products error:', error);
-    grid.innerHTML = '<div class="catalog-error">Unable to load the catalogue right now. Please WhatsApp us at +91 80822 20143 — we\'ll send model + price instantly.</div>';
+    const detail = error ? `<br><small style="color:var(--muted);">${escapeHtml(error.message || String(error))}</small>` : '';
+    grid.innerHTML = `<div class="catalog-error">Unable to load the catalogue right now. Please WhatsApp us at +91 80822 20143 — we'll send model + price instantly.${detail}</div>`;
     return;
   }
 
@@ -624,7 +625,8 @@ async function loadFeatured() {
 
   if (error || !data || !data.length) {
     console.error('Supabase featured error:', error);
-    grid.innerHTML = '<div class="catalog-error" style="grid-column:1/-1;">Featured phones will be back shortly. <a href="products.html">Browse all products</a></div>';
+    const detail = error ? `<br><small style="color:var(--muted);">${escapeHtml(error.message || String(error))}</small>` : '';
+    grid.innerHTML = `<div class="catalog-error" style="grid-column:1/-1;">Featured products will be back shortly. <a href="products.html">Browse all products</a>${detail}</div>`;
     return;
   }
 
@@ -868,9 +870,16 @@ function renderProductDetail(p) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  wireBaseInteractions();
-  loadFullCatalog();
-  loadFeatured();
-  loadProductDetail();
-  wireContactForm();
+  const safe = (fn, name) => { try { fn(); } catch (e) { console.error(`[app] ${name} failed:`, e); } };
+  safe(wireBaseInteractions, 'wireBaseInteractions');
+  safe(loadFullCatalog, 'loadFullCatalog');
+  safe(loadFeatured, 'loadFeatured');
+  safe(loadProductDetail, 'loadProductDetail');
+  safe(wireContactForm, 'wireContactForm');
+});
+
+// Surface any unhandled promise rejection (Supabase fetches return promises)
+// so the next debugging round doesn't have to guess at it.
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('[app] unhandled rejection:', e.reason);
 });
