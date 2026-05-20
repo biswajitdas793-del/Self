@@ -391,6 +391,42 @@ function specRow(label, value) {
   return `<div class="pm-spec"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`;
 }
 
+// Phone descriptions follow this pattern from GSMArena imports:
+//   "Brand Model smartphone. Announced Mon YYYY. Features 6.7″ display, X chipset, NNNN mAh battery, NNN GB storage, N GB RAM, <extras>."
+// We split that into a clean lede + a structured spec list so the detail modal
+// has real rows instead of an empty grid (the dedicated columns are still NULL).
+function parsePhoneDescription(desc) {
+  if (!desc) return { lede: '', specs: [] };
+  const fm = desc.match(/^(.*?)\bFeatures\s+(.+?)\.?\s*$/i);
+  if (!fm) return { lede: desc.trim(), specs: [] };
+  const lede = fm[1].trim().replace(/\.+$/, '') + '.';
+  const parts = fm[2].split(/,\s*/).map((s) => s.trim()).filter(Boolean);
+  const specs = [];
+  const others = [];
+  for (const part of parts) {
+    let m;
+    if ((m = part.match(/^([\d.]+)\s*[″"]\s*display/i))) {
+      specs.push(['Display', `${m[1]}″`]);
+    } else if ((m = part.match(/^(.+?)\s+chipset$/i))) {
+      specs.push(['Chipset', m[1].trim()]);
+    } else if ((m = part.match(/^([\d,.]+)\s*mAh\s*battery/i))) {
+      specs.push(['Battery', `${m[1]} mAh`]);
+    } else if ((m = part.match(/^([\d,.]+)\s*GB\s*storage/i))) {
+      specs.push(['Storage', `${m[1]} GB`]);
+    } else if ((m = part.match(/^([\d,.]+)\s*TB\s*storage/i))) {
+      specs.push(['Storage', `${m[1]} TB`]);
+    } else if ((m = part.match(/^([\d,.]+)\s*GB\s*RAM/i))) {
+      specs.push(['RAM', `${m[1]} GB`]);
+    } else if (/IP\d{2}/i.test(part) || /water/i.test(part)) {
+      specs.push(['Water resistance', part]);
+    } else {
+      others.push(part);
+    }
+  }
+  if (others.length) specs.push(['Build / protection', others.join(', ')]);
+  return { lede, specs };
+}
+
 function buildModalBody(p) {
   const title = `${p.name}${p.storage ? ' ' + p.storage : ''}`;
   const searchQ = p.flipkart_query || title;
@@ -398,23 +434,34 @@ function buildModalBody(p) {
   const disc = discountPct(p.price_inr, p.mrp_inr);
   const isPhone = (p.category || 'smartphone') === 'smartphone';
 
-  // Description can be "Lead sentence. Highlights: A | B | C." — split the highlights into chips.
+  // Accessory descriptions are written as "Lead sentence. Highlights: A | B | C."
+  // Phone descriptions are written as "Lead sentence. Announced X. Features ..."
   let lede = p.description || '';
   let highlights = [];
-  const m = lede.match(/^(.*?)\s*Highlights:\s*(.+?)\.?\s*$/i);
-  if (m) {
-    lede = m[1].trim();
-    highlights = m[2].split('|').map((s) => s.trim()).filter(Boolean);
+  let phoneSpecPairs = [];
+
+  const hlMatch = lede.match(/^(.*?)\s*Highlights:\s*(.+?)\.?\s*$/i);
+  if (hlMatch) {
+    lede = hlMatch[1].trim();
+    highlights = hlMatch[2].split('|').map((s) => s.trim()).filter(Boolean);
+  } else if (isPhone) {
+    const parsed = parsePhoneDescription(lede);
+    lede = parsed.lede;
+    phoneSpecPairs = parsed.specs;
   }
 
-  const phoneSpecs = isPhone ? `
+  // Prefer dedicated columns when populated; fall back to parsed pairs.
+  const specRows = isPhone ? [
+    ['Display', p.display],
+    ['Chipset', p.processor],
+    ['Main camera', p.main_camera],
+    ['Battery', p.battery],
+    ['Storage', p.storage],
+  ].filter(([, v]) => v) : [];
+  const finalSpecs = specRows.length ? specRows : phoneSpecPairs;
+  const phoneSpecs = finalSpecs.length ? `
     <dl class="pm-specs">
-      ${specRow('Display', p.display)}
-      ${specRow('Chipset', p.processor)}
-      ${specRow('Main camera', p.main_camera)}
-      ${specRow('Battery', p.battery)}
-      ${specRow('Storage', p.storage)}
-      ${specRow('RAM', p.ram)}
+      ${finalSpecs.map(([label, value]) => specRow(label, value)).join('')}
     </dl>` : '';
 
   const highlightChips = highlights.length ? `
