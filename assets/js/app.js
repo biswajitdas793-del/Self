@@ -514,6 +514,7 @@ function getCategoryFromUrl() {
 
 const CATEGORY_LABELS = {
   smartphone: 'Mobiles',
+  tablets: 'iPad / Tablets',
   tws: 'TWS Earbuds',
   headphones: 'Headphones',
   smartwatches: 'Smartwatches',

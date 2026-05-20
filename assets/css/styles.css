@@ -448,8 +448,8 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
 /* ===== Categories ===== */
 .cat-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
 }
 .cat-card {
   background: var(--paper);
