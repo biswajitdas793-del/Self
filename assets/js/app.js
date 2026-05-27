@@ -6,6 +6,14 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const WA_NUMBER = '918082220143';
 const fmtPrice = (n) => '₹' + Number(n).toLocaleString('en-IN');
 const wa = (msg) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+
+// Fire-and-forget demand tracking for the owner dashboard. Never blocks the UI.
+function trackEvent(productId, eventType) {
+  if (!productId) return;
+  try {
+    supabase.from('product_events').insert({ product_id: productId, event_type: eventType }).then(() => {}, () => {});
+  } catch (_) { /* tracking must never break the page */ }
+}
 const flipkart = (q) => `https://www.flipkart.com/search?q=${encodeURIComponent(q)}`;
 const amazon = (q) => `https://www.amazon.in/s?k=${encodeURIComponent(q)}`;
 
@@ -716,6 +724,7 @@ async function loadProductDetail() {
     return;
   }
 
+  trackEvent(data.id, 'view');
   renderProductDetail(data);
 }
 
@@ -873,6 +882,7 @@ function renderProductDetail(p) {
     const storageLbl = root.querySelector('.pdp-chip.active')?.dataset.label || '';
     waAnchor.href = wa(buildWaMsg({ colour, storage: storageLbl }));
   };
+  if (waAnchor) waAnchor.addEventListener('click', () => trackEvent(p.id, 'whatsapp'));
 
   // Wire up colour swatches (selection highlight + name label + optional
   // per-colour image swap + WhatsApp message rebuild)

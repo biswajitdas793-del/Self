@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="referrer" content="no-referrer" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Owner Portal — Namaskar Telecom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/admin.css?v=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F5295B'/%3E%3Ctext x='32' y='42' font-family='Poppins,Arial' font-size='30' font-weight='800' text-anchor='middle' fill='white'%3EN%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<!-- ===== Login screen ===== -->
+<div id="login-screen" class="login-screen" hidden>
+  <form id="login-form" class="login-card">
+    <div class="login-logo"><span class="logo-mark">N</span></div>
+    <h1>Owner Portal</h1>
+    <p class="login-sub">Namaskar Telecom — sign in to manage your store</p>
+    <label>Email
+      <input type="email" id="login-email" autocomplete="username" required placeholder="owner@namaskartelecom.in" />
+    </label>
+    <label>Password
+      <input type="password" id="login-password" autocomplete="current-password" required placeholder="••••••••" />
+    </label>
+    <p id="login-error" class="login-error" hidden></p>
+    <button type="submit" class="btn btn-primary" id="login-btn">Sign in</button>
+  </form>
+</div>
+
+<!-- ===== App ===== -->
+<div id="app" class="app" hidden>
+  <header class="admin-top">
+    <div class="admin-brand"><span class="logo-mark">N</span> <strong>Owner Portal</strong></div>
+    <nav class="admin-tabs">
+      <button class="tab active" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="products">Products</button>
+    </nav>
+    <div class="admin-actions">
+      <a href="index.html" target="_blank" class="ghost-link">View site ↗</a>
+      <button id="logout-btn" class="ghost-link">Log out</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <!-- Dashboard -->
+    <section id="view-dashboard" class="view">
+      <div class="stat-row" id="stat-row"></div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Sales</h2>
+          <div class="seg" id="sales-range">
+            <button class="seg-btn active" data-range="month">Monthly</button>
+            <button class="seg-btn" data-range="quarter">Quarterly</button>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="sales-chart"></canvas></div>
+      </div>
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="panel-head"><h2>Hero products — top sellers</h2></div>
+          <ol id="top-sellers" class="rank-list"><li class="empty">No sales logged yet.</li></ol>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Most wanted — by enquiries</h2></div>
+          <ol id="most-wanted" class="rank-list"><li class="empty">No enquiries tracked yet.</li></ol>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Restock list — currently sold out</h2></div>
+        <div id="restock-list" class="restock-list"><p class="empty">Everything is in stock 🎉</p></div>
+      </div>
+    </section>
+
+    <!-- Products -->
+    <section id="view-products" class="view" hidden>
+      <div class="products-bar">
+        <input type="search" id="prod-search" placeholder="Search products…" />
+        <select id="prod-cat-filter">
+          <option value="all">All categories</option>
+          <option value="smartphone">Mobiles</option>
+          <option value="tablets">iPad / Tablets</option>
+          <option value="tws">TWS</option>
+          <option value="headphones">Headphones</option>
+          <option value="smartwatches">Smartwatches</option>
+        </select>
+        <button class="btn btn-primary" id="add-product-btn">+ Add product</button>
+      </div>
+      <div id="products-list" class="admin-products"><p class="empty">Loading…</p></div>
+    </section>
+  </main>
+</div>
+
+<!-- ===== Product editor drawer ===== -->
+<div id="editor" class="drawer" hidden>
+  <div class="drawer-backdrop" data-close-editor></div>
+  <form id="product-form" class="drawer-panel">
+    <div class="drawer-head">
+      <h2 id="editor-title">Add product</h2>
+      <button type="button" class="icon-btn" data-close-editor>✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="photo-field">
+        <div class="photo-preview" id="photo-preview"><span>No photo</span></div>
+        <div>
+          <input type="file" id="photo-input" accept="image/*" hidden />
+          <button type="button" class="btn btn-ghost" id="photo-btn">Upload photo</button>
+          <p class="hint" id="photo-hint">Pick from gallery — auto-compressed before saving.</p>
+        </div>
+      </div>
+
+      <label>Brand
+        <input type="text" id="f-brand" list="brand-list" required />
+        <datalist id="brand-list"></datalist>
+      </label>
+      <label>Model name
+        <input type="text" id="f-name" required placeholder="e.g. iPhone 17 Pro" />
+      </label>
+      <label>Category
+        <select id="f-category" required>
+          <option value="smartphone">Mobiles</option>
+          <option value="tablets">iPad / Tablets</option>
+          <option value="tws">TWS</option>
+          <option value="headphones">Headphones</option>
+          <option value="smartwatches">Smartwatches</option>
+        </select>
+      </label>
+      <div class="field-row">
+        <label>Selling price (₹)
+          <input type="number" id="f-price" min="0" required placeholder="79900" />
+        </label>
+        <label>Original / MRP (₹)
+          <input type="number" id="f-mrp" min="0" placeholder="84900" />
+        </label>
+      </div>
+      <label>Description
+        <textarea id="f-desc" rows="3" placeholder="Short description for the product page…"></textarea>
+      </label>
+      <div class="check-row">
+        <label class="check"><input type="checkbox" id="f-instock" checked /> In stock</label>
+        <label class="check"><input type="checkbox" id="f-new" /> Mark as “New”</label>
+        <label class="check"><input type="checkbox" id="f-featured" /> Feature on homepage</label>
+      </div>
+
+      <details class="advanced">
+        <summary>Advanced (optional)</summary>
+        <label>Colours <span class="hint">comma separated, e.g. Black, Silver, Blue</span>
+          <input type="text" id="f-colors" placeholder="Black, Silver, Blue" />
+        </label>
+        <label>Highlights <span class="hint">one per line</span>
+          <textarea id="f-highlights" rows="3" placeholder="120Hz display&#10;5000mAh battery"></textarea>
+        </label>
+      </details>
+    </div>
+    <div class="drawer-foot">
+      <p id="editor-error" class="login-error" hidden></p>
+      <button type="button" class="btn btn-ghost" data-close-editor>Cancel</button>
+      <button type="submit" class="btn btn-primary" id="save-product-btn">Save</button>
+    </div>
+  </form>
+</div>
+
+<!-- ===== Mark-sold dialog ===== -->
+<div id="sold-dialog" class="modal" hidden>
+  <div class="modal-backdrop" data-close-sold></div>
+  <form id="sold-form" class="modal-card">
+    <h2>Record a sale</h2>
+    <p id="sold-product" class="sold-product"></p>
+    <div class="field-row">
+      <label>Quantity
+        <input type="number" id="sold-qty" min="1" value="1" required />
+      </label>
+      <label>Sale price each (₹)
+        <input type="number" id="sold-price" min="0" required />
+      </label>
+    </div>
+    <label>Date
+      <input type="date" id="sold-date" required />
+    </label>
+    <label>Note (optional)
+      <input type="text" id="sold-note" placeholder="e.g. exchange, EMI" />
+    </label>
+    <p id="sold-error" class="login-error" hidden></p>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-close-sold>Cancel</button>
+      <button type="submit" class="btn btn-primary">Save sale</button>
+    </div>
+  </form>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="assets/js/admin.js?v=1"></script>
+</body>
+</html>
