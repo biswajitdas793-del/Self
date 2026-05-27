@@ -2,31 +2,32 @@
 /* Confident, retail-grounded palette: oxblood primary, warm cream surfaces,
    muted gold accent. Editorial serif display, geometric sans body. */
 :root {
-  --brand: #7C1518;
-  --brand-dark: #5A0E13;
-  --brand-soft: #F8E8E8;
-  --brand-glow: rgba(124,21,24,.12);
-  --ink: #14110F;
-  --ink-soft: #3A3530;
-  --muted: #807872;
-  --line: #EAE3DA;
-  --line-strong: #D6CCBE;
-  --bg: #FBF8F3;
-  --bg-soft: #F4EEE4;
-  --bg-tint: #F9F1E8;
+  --brand: #F5295B;        /* vivid raspberry — energetic, modern */
+  --brand-dark: #CE1048;
+  --brand-soft: #FFE3EC;
+  --brand-glow: rgba(245,41,91,.16);
+  --ink: #15121A;          /* near-black, faint warm */
+  --ink-soft: #46414E;
+  --muted: #8C8693;
+  --line: #ECE7EF;
+  --line-strong: #DBD4DF;
+  --bg: #FFFFFF;
+  --bg-soft: #F6F3F8;      /* very light neutral with a faint lilac */
+  --bg-tint: #FCEFF3;      /* hero wash */
   --paper: #FFFFFF;
-  --accent: #1A1714;       /* near-black, warm */
-  --accent-2: #B8893E;     /* muted antique gold */
-  --accent-3: #1B6B4A;     /* deep forest, used sparingly */
-  --whatsapp: #1B8E54;     /* deeper than #25D366 — looks intentional, not neon */
-  --whatsapp-dark: #136B40;
-  --success: #1B6B4A;
-  --radius: 14px;
-  --radius-sm: 8px;
-  --radius-lg: 20px;
-  --shadow-sm: 0 1px 2px rgba(20,17,15,.04);
-  --shadow: 0 4px 16px rgba(20,17,15,.06);
-  --shadow-lg: 0 18px 38px rgba(20,17,15,.10);
+  --accent: #15121A;       /* near-black for dark surfaces */
+  --accent-2: #C2F73A;     /* acid lime — Gen-Z pop, used on fills */
+  --accent-3: #16A34A;     /* success green */
+  --pop: #C2F73A;
+  --whatsapp: #1FA855;
+  --whatsapp-dark: #15833F;
+  --success: #16A34A;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-lg: 22px;
+  --shadow-sm: 0 1px 2px rgba(21,18,26,.05);
+  --shadow: 0 6px 22px rgba(21,18,26,.07);
+  --shadow-lg: 0 20px 44px rgba(21,18,26,.12);
   --container: 1180px;
 }
 
@@ -53,7 +54,7 @@ a { color: inherit; text-decoration: none; }
   padding: 0 20px;
 }
 
-h1, h2 { font-family: 'Fraunces', 'Georgia', serif; color: var(--ink); margin: 0 0 14px; line-height: 1.08; letter-spacing: -.02em; font-feature-settings: "ss01", "ss02"; }
+h1, h2 { font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; color: var(--ink); margin: 0 0 14px; line-height: 1.08; letter-spacing: -.02em; font-feature-settings: "ss01", "ss02"; }
 h3, h4 { font-family: 'Inter', system-ui, sans-serif; color: var(--ink); margin: 0 0 10px; line-height: 1.25; }
 h1 { font-size: clamp(2.1rem, 5.4vw, 3.7rem); font-weight: 600; }
 h2 { font-size: clamp(1.6rem, 3.2vw, 2.35rem); font-weight: 500; }
@@ -129,13 +130,13 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
   border-radius: 8px;
   display: grid;
   place-items: center;
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   font-weight: 700;
   font-size: 1.3rem;
   letter-spacing: -.02em;
 }
 .logo-text { line-height: 1.1; }
-.logo-text strong { display: block; font-weight: 600; font-size: 1.1rem; color: var(--ink); font-family: 'Fraunces', Georgia, serif; letter-spacing: -.015em; }
+.logo-text strong { display: block; font-weight: 600; font-size: 1.1rem; color: var(--ink); font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; letter-spacing: -.015em; }
 .logo-text small { color: var(--muted); font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 500; }
 
 .nav { display: flex; gap: 28px; align-items: center; }
@@ -181,18 +182,19 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  padding: 13px 22px;
-  border-radius: 8px;
+  padding: 13px 24px;
+  border-radius: 999px;
   font-weight: 600;
   font-size: .93rem;
   letter-spacing: -.005em;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .12s ease;
   white-space: nowrap;
   line-height: 1;
   font-family: 'Inter', system-ui, sans-serif;
 }
+.btn:active { transform: translateY(1px); }
 .btn-primary { background: var(--brand); color: #fff; }
 .btn-primary:hover { background: var(--brand-dark); }
 .btn-ghost { background: transparent; border-color: var(--line-strong); color: var(--ink); }
@@ -210,8 +212,8 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
   overflow: hidden;
   padding: 56px 0 88px;
   background:
-    radial-gradient(900px 600px at 90% 10%, rgba(184,137,62,.18), transparent 55%),
-    radial-gradient(700px 500px at -5% 80%, rgba(124,21,24,.13), transparent 60%),
+    radial-gradient(900px 600px at 90% 10%, rgba(194,247,58,.20), transparent 55%),
+    radial-gradient(700px 500px at -5% 80%, rgba(245,41,91,.14), transparent 60%),
     linear-gradient(180deg, var(--bg-tint), var(--bg));
 }
 .hero::before {
@@ -560,7 +562,7 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
 
 .product-body { padding: 18px; display: flex; flex-direction: column; flex: 1; }
 .product-brand { font-size: .68rem; color: var(--muted); letter-spacing: .16em; text-transform: uppercase; font-weight: 600; }
-.product-name { font-size: 1.05rem; font-weight: 600; margin: 4px 0 8px; color: var(--ink); line-height: 1.28; font-family: 'Fraunces', Georgia, serif; letter-spacing: -.01em; }
+.product-name { font-size: 1.05rem; font-weight: 600; margin: 4px 0 8px; color: var(--ink); line-height: 1.28; font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; letter-spacing: -.01em; }
 .product-desc { font-size: .84rem; color: var(--muted); margin: 0 0 12px;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.45; }
 .spec-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
@@ -579,7 +581,7 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
 }
 .spec-icon { display: inline-flex; align-items: center; color: var(--muted); }
 .product-price-row { display: flex; align-items: baseline; gap: 10px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); }
-.price { font-size: 1.2rem; font-weight: 600; color: var(--ink); font-family: 'Fraunces', Georgia, serif; letter-spacing: -.015em; }
+.price { font-size: 1.2rem; font-weight: 600; color: var(--ink); font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; letter-spacing: -.015em; }
 .price-old { font-size: .82rem; color: var(--muted); text-decoration: line-through; }
 .product-actions { display: flex; gap: 8px; margin-top: 14px; }
 .product-actions .btn { flex: 1; min-width: 0; padding: 11px 12px; font-size: .82rem; justify-content: center; white-space: normal; text-align: center; line-height: 1.2; }
@@ -1257,7 +1259,7 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
   color: var(--muted);
 }
 .pm-name {
-  font-family: 'Fraunces', 'Georgia', serif;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   font-size: 1.6rem;
   line-height: 1.15;
   font-weight: 600;
@@ -1273,7 +1275,7 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
   margin-top: 4px;
   flex-wrap: wrap;
 }
-.pm-price { font-family: 'Fraunces', serif; font-size: 1.7rem; font-weight: 700; color: var(--brand); letter-spacing: -.02em; }
+.pm-price { font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--brand); letter-spacing: -.02em; }
 .pm-price-old { text-decoration: line-through; color: var(--muted); font-size: 1rem; }
 .pm-discount {
   background: rgba(27, 107, 74, .10);
@@ -1393,7 +1395,7 @@ body.pm-locked { overflow: hidden; }
   color: var(--muted);
 }
 .pdp-name {
-  font-family: 'Fraunces', 'Georgia', serif;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   font-size: clamp(1.6rem, 3.2vw, 2.2rem);
   font-weight: 600;
   letter-spacing: -.02em;
@@ -1408,7 +1410,7 @@ body.pm-locked { overflow: hidden; }
   flex-wrap: wrap;
 }
 .pdp-price {
-  font-family: 'Fraunces', serif;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   font-size: 2.1rem;
   font-weight: 700;
   letter-spacing: -.02em;
@@ -1525,7 +1527,7 @@ body.pm-locked { overflow: hidden; }
 
 .pdp-specs-wrap { margin-top: 56px; }
 .pdp-h2 {
-  font-family: 'Fraunces', 'Georgia', serif;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 22px;
@@ -1601,7 +1603,7 @@ body.pm-locked { overflow: hidden; }
   will-change: transform;
 }
 .marquee-item {
-  font-family: 'Fraunces', 'Georgia', serif;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   font-weight: 600;
   font-size: 1.4rem;
   letter-spacing: -.01em;
