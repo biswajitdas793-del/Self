@@ -563,6 +563,7 @@ function renderCatalog(items) {
   grid.innerHTML = items.map(productCard).join('');
   attachFavToggle(grid);
   wireCardClicks(grid, items);
+  document.dispatchEvent(new CustomEvent('catalog:rendered', { detail: { grid } }));
 }
 
 function attachFilters(allProducts, initialCategory = 'all') {
@@ -634,6 +635,7 @@ async function loadFeatured() {
   grid.innerHTML = data.map(productCard).join('');
   attachFavToggle(grid);
   wireCardClicks(grid, data);
+  document.dispatchEvent(new CustomEvent('catalog:rendered', { detail: { grid } }));
 }
 
 function wireContactForm() {
