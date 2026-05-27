@@ -25,7 +25,7 @@ let currentRange = 'month';
 /* ---------------- boot ---------------- */
 init();
 async function init() {
-  wireLogin(); wireTabs(); wireEditor(); wireSold(); wireProductsBar(); wireSalesRange();
+  wireLogin(); wireTabs(); wireEditor(); wireSold(); wireProductsBar(); wireSalesRange(); wirePassword();
   const { data: { session } } = await supabase.auth.getSession();
   session ? showApp() : showLogin();
   supabase.auth.onAuthStateChange((event) => {
@@ -62,6 +62,26 @@ function wireLogin() {
     if (error) { err.textContent = error.message || 'Could not sign in.'; err.hidden = false; }
   });
   $('#logout-btn').addEventListener('click', () => supabase.auth.signOut());
+}
+
+function wirePassword() {
+  $('#pw-btn').addEventListener('click', () => {
+    $('#pw-new').value = ''; $('#pw-confirm').value = '';
+    $('#pw-error').hidden = true; $('#pw-dialog').hidden = false;
+  });
+  $$('[data-close-pw]').forEach((b) => b.addEventListener('click', () => { $('#pw-dialog').hidden = true; }));
+  $('#pw-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = $('#pw-error'); err.hidden = true;
+    const pw = $('#pw-new').value, confirm = $('#pw-confirm').value;
+    if (pw.length < 8) { err.textContent = 'Password must be at least 8 characters.'; err.hidden = false; return; }
+    if (pw !== confirm) { err.textContent = 'Passwords do not match.'; err.hidden = false; return; }
+    const btn = $('#pw-save'); btn.disabled = true; btn.textContent = 'Updating…';
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    btn.disabled = false; btn.textContent = 'Update password';
+    if (error) { err.textContent = error.message; err.hidden = false; return; }
+    $('#pw-dialog').hidden = true; toast('Password updated ✓');
+  });
 }
 
 function wireTabs() {
