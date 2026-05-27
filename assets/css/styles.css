@@ -1615,3 +1615,19 @@ body.pm-locked { overflow: hidden; }
   .marquee-track { gap: 36px; }
   .marquee-item { font-size: 1.15rem; }
 }
+
+/* ===== Hero 3D phone ===== */
+.hero-3d {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity .5s ease;
+  cursor: grab;
+}
+.hero-3d.ready { opacity: 1; }
+.hero-3d:active { cursor: grabbing; }
+.hero-3d canvas { width: 100% !important; height: 100% !important; display: block; }
+/* When the WebGL scene mounts, retire the photo fallback but keep the
+   floating badges (they sit above via their own z-index). */
+.hero-visual.has-3d .hero-banner { opacity: 0; visibility: hidden; pointer-events: none; }
