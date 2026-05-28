@@ -448,11 +448,14 @@ function renderChart(sales, range) {
   if (salesChart) salesChart.destroy();
   salesChart = new Chart($('#sales-chart'), {
     type: 'bar',
-    data: { labels: buckets.labels, datasets: [{ data: buckets.values, backgroundColor: '#F5295B', borderRadius: 6, maxBarThickness: 46 }] },
+    data: { labels: buckets.labels, datasets: [{ data: buckets.values, backgroundColor: '#19B98A', hoverBackgroundColor: '#22DBA6', borderRadius: 6, maxBarThickness: 46 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => fmt(c.parsed.y) } } },
-      scales: { y: { beginAtZero: true, ticks: { callback: (v) => v >= 1000 ? '₹' + (v / 1000) + 'k' : '₹' + v } }, x: { grid: { display: false } } }
+      scales: {
+        y: { beginAtZero: true, ticks: { color: 'rgba(244,242,246,.55)', callback: (v) => v >= 1000 ? '₹' + (v / 1000) + 'k' : '₹' + v }, grid: { color: 'rgba(255,255,255,.06)' } },
+        x: { ticks: { color: 'rgba(244,242,246,.55)' }, grid: { display: false } }
+      }
     }
   });
 }
