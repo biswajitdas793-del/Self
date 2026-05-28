@@ -1772,3 +1772,7 @@ body.pm-locked { overflow: hidden; }
 ::-webkit-scrollbar { width: 11px; height: 11px; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 8px; border: 3px solid transparent; background-clip: content-box; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.28); background-clip: content-box; }
+
+/* --- Hero network/connectivity field --- */
+.hero-net { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.hero > .container { position: relative; z-index: 2; }
