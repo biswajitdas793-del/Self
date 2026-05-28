@@ -72,6 +72,7 @@ function init() {
   revealOnScroll('.section-head');
   revealOnScroll('.cat-card', { stagger: 0.1 });
   revealOnScroll('.why-card', { stagger: 0.1 });
+  revealOnScroll('.glow-card', { stagger: 0.1 });
   revealOnScroll('.timeline li', { y: 20, stagger: 0.12 });
   revealOnScroll('.cta-banner', { y: 32 });
   revealOnScroll('.pdp-top', { y: 24 });

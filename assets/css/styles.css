@@ -656,6 +656,31 @@ p  { color: var(--ink-soft); margin: 0 0 12px; }
 .why-card h3 { margin-bottom: 6px; }
 .why-card p { font-size: .92rem; margin: 0; }
 
+/* ===== Glowing gradient-border feature cards (home "Why us") ===== */
+.glow-section { background: #0A0A0B; }
+.glow-section .eyebrow { background: rgba(255,255,255,.08); color: #fff; }
+.glow-section .section-head h2 { color: #fff; }
+.glow-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.glow-card { position: relative; }
+.glow-card .glow-blur {
+  position: absolute; top: 0; left: 0; right: 0; height: 100%;
+  border-radius: 40px; background: var(--g); filter: blur(45px);
+  opacity: .5; pointer-events: none;
+}
+.glow-card .glow-inner {
+  position: relative; z-index: 1; height: 280px; border-radius: 40px;
+  border: 8px solid transparent;
+  background: linear-gradient(#1A1A1C, #1A1A1C) padding-box, var(--g) border-box;
+  padding: 26px; display: flex; flex-direction: column; justify-content: space-between;
+  overflow: hidden;
+}
+.glow-card .glow-icon { color: rgba(255,255,255,.9); }
+.glow-card .glow-icon svg { width: 30px; height: 30px; }
+.glow-card h3 { color: #fff; font-weight: 600; font-size: 1.2rem; margin: 0 0 10px; letter-spacing: -.01em; }
+.glow-card p { color: #9CA3AF; font-size: .875rem; line-height: 1.6; margin: 0; }
+@media (max-width: 900px) { .glow-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .glow-grid { grid-template-columns: 1fr; } .glow-card .glow-inner { height: 260px; } }
+
 /* ===== Testimonials ===== */
 .testimonials {
   background:
