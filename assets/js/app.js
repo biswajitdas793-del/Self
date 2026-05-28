@@ -22,20 +22,20 @@ const amazon = (q) => `https://www.amazon.in/s?k=${encodeURIComponent(q)}`;
    Front view shows screen + brand wordmark; back view shows brand-correct camera layout. */
 
 const BRAND_PALETTE = {
-  Apple:    [['#1F2937','#FFF'], ['#A8A29E','#1F2937'], ['#C9B58B','#1F2937'], ['#F5F5F0','#1F2937']],
-  Samsung:  [['#1B1F2A','#A0A8B8'], ['#3C4A66','#A0B0C5'], ['#7D8595','#1F2937'], ['#4F2E2E','#D4A099']],
-  Vivo:     [['#1A1F2E','#5B7CB8'], ['#0E2A4A','#C9B58B'], ['#E8E4D9','#1F2937'], ['#2D5547','#E8E4D9']],
-  OPPO:     [['#0F2A1F','#7BA890'], ['#1F2937','#E8E4D9'], ['#7D8595','#1F2937'], ['#3D2E4A','#C9A8D9']],
-  OnePlus:  [['#1F1F1F','#7BA890'], ['#0E2A35','#E8E4D9'], ['#2D2D2D','#D14B45']],
-  Xiaomi:   [['#1F2937','#FF6900'], ['#0F1A2A','#5B7CB8'], ['#E8E4D9','#1F2937'], ['#1F1F1F','#A8A29E']],
-  Realme:   [['#B89067','#1F2937'], ['#1F2937','#F5C453'], ['#2C3E50','#E8E4D9']],
-  Motorola: [['#3D5A6C','#E8E4D9'], ['#1F2937','#D4A099'], ['#5B6D54','#E8E4D9']],
+  Apple:    [['#1F1F22','#FFF'], ['#A8A29E','#1F1F22'], ['#C9B58B','#1F1F22'], ['#F5F5F0','#1F1F22']],
+  Samsung:  [['#20201F','#B9B4AE'], ['#3A3A3F','#C9C4BE'], ['#7D7A82','#1F1F22'], ['#4F2E2E','#D4A099']],
+  Vivo:     [['#22201E','#C9824B'], ['#143A2E','#C9B58B'], ['#E8E4D9','#1F1F22'], ['#2D5547','#E8E4D9']],
+  OPPO:     [['#0F2A1F','#7BA890'], ['#1F1F22','#E8E4D9'], ['#7D7A82','#1F1F22'], ['#3D2E4A','#C9A8D9']],
+  OnePlus:  [['#1F1F1F','#7BA890'], ['#143A2E','#E8E4D9'], ['#2D2D2D','#D14B45']],
+  Xiaomi:   [['#1F1F22','#FF6900'], ['#26241F','#E06A2B'], ['#E8E4D9','#1F1F22'], ['#1F1F1F','#A8A29E']],
+  Realme:   [['#B89067','#1F1F22'], ['#1F1F22','#F5C453'], ['#2E2A28','#E8E4D9']],
+  Motorola: [['#3A4A3F','#E8E4D9'], ['#1F1F22','#D4A099'], ['#5B6D54','#E8E4D9']],
   Nothing:  [['#1A1A1A','#F5F5F5'], ['#F5F5F5','#1A1A1A']],
-  Tecno:    [['#1F1F1F','#C9B58B'], ['#0E2A35','#E8E4D9'], ['#3D3D3D','#F5C453']],
+  Tecno:    [['#1F1F1F','#C9B58B'], ['#143A2E','#E8E4D9'], ['#3D3D3D','#F5C453']],
 };
 
 function pickColors(brand, id) {
-  const palette = BRAND_PALETTE[brand] || [['#1F2937','#A0A8B8']];
+  const palette = BRAND_PALETTE[brand] || [['#1F1F22','#A8A29E']];
   return palette[id % palette.length];
 }
 
@@ -44,7 +44,7 @@ function pickColors(brand, id) {
 function brandCamera(brand, accentColor) {
   const lens = (cx, cy, r = 14) =>
     `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#0A0A0A" stroke="#2A2A2A" stroke-width="1.5"/>
-     <circle cx="${cx}" cy="${cy}" r="${r * 0.55}" fill="#1F2A3A"/>
+     <circle cx="${cx}" cy="${cy}" r="${r * 0.55}" fill="#2A2A30"/>
      <circle cx="${cx - r * 0.3}" cy="${cy - r * 0.3}" r="${r * 0.18}" fill="rgba(255,255,255,.35)"/>`;
   const flash = (cx, cy) =>
     `<circle cx="${cx}" cy="${cy}" r="4" fill="#F5E9C7" opacity=".85"/>`;
@@ -159,8 +159,8 @@ function svgFold(p) {
         <stop offset="1" stop-color="${shadeColor(body, -0.22)}"/>
       </linearGradient>
       <linearGradient id="gs${p.id}" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#0B0F1A"/>
-        <stop offset="1" stop-color="#1F2937"/>
+        <stop offset="0" stop-color="#101014"/>
+        <stop offset="1" stop-color="#1C1C22"/>
       </linearGradient>
     </defs>
     <!-- left panel (back of phone) -->
@@ -195,13 +195,13 @@ function svgFlip(p) {
     </defs>
     <!-- top half (with cover screen + cameras) -->
     <rect x="22" y="10" width="156" height="150" rx="22" fill="url(#gp${p.id})"/>
-    <rect x="32" y="40" width="84" height="80" rx="10" fill="#0B0F1A"/>
+    <rect x="32" y="40" width="84" height="80" rx="10" fill="#101014"/>
     <text x="74" y="86" font-family="Poppins" font-size="11" font-weight="700"
           fill="rgba(255,255,255,.8)" text-anchor="middle">9:41</text>
     <text x="74" y="104" font-family="Inter" font-size="8" fill="rgba(255,255,255,.55)" text-anchor="middle">Mon, May 19</text>
     <!-- camera lenses on top-right -->
-    <circle cx="148" cy="56" r="10" fill="#0A0A0A"/><circle cx="148" cy="56" r="5" fill="#1F2A3A"/>
-    <circle cx="148" cy="86" r="10" fill="#0A0A0A"/><circle cx="148" cy="86" r="5" fill="#1F2A3A"/>
+    <circle cx="148" cy="56" r="10" fill="#0A0A0A"/><circle cx="148" cy="56" r="5" fill="#2A2A30"/>
+    <circle cx="148" cy="86" r="10" fill="#0A0A0A"/><circle cx="148" cy="86" r="5" fill="#2A2A30"/>
     <!-- hinge gap -->
     <rect x="22" y="160" width="156" height="6" fill="rgba(0,0,0,.3)"/>
     <!-- bottom half -->
