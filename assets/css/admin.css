@@ -8,6 +8,7 @@
   --shadow:0 8px 30px rgba(21,18,26,.08); --shadow-sm:0 2px 10px rgba(21,18,26,.05);
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html,body{margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg-soft);-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:'Space Grotesk','Inter',sans-serif;font-weight:700;letter-spacing:-.01em;margin:0}
