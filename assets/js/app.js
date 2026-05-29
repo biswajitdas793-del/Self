@@ -117,8 +117,9 @@ function brandCamera(brand, accentColor) {
   }
 }
 
-function svgBar(p) {
-  const [body, accent] = pickColors(p.brand, p.id || 0);
+function svgBar(p, bodyOverride) {
+  let [body, accent] = pickColors(p.brand, p.id || 0);
+  if (bodyOverride) body = bodyOverride;
   const cam = brandCamera(p.brand, accent);
   return `<svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
@@ -148,8 +149,9 @@ function svgBar(p) {
   </svg>`;
 }
 
-function svgFold(p) {
-  const [body, accent] = pickColors(p.brand, p.id || 0);
+function svgFold(p, bodyOverride) {
+  let [body, accent] = pickColors(p.brand, p.id || 0);
+  if (bodyOverride) body = bodyOverride;
   const cam = brandCamera(p.brand, accent);
   // Open book: left panel showing back (with cameras + screen on right panel)
   return `<svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -182,8 +184,9 @@ function svgFold(p) {
   </svg>`;
 }
 
-function svgFlip(p) {
-  const [body, accent] = pickColors(p.brand, p.id || 0);
+function svgFlip(p, bodyOverride) {
+  let [body, accent] = pickColors(p.brand, p.id || 0);
+  if (bodyOverride) body = bodyOverride;
   const cam = brandCamera(p.brand, accent);
   // Closed clamshell: small cover screen on top half, hinge mid, lower half closed
   return `<svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -219,14 +222,25 @@ function shadeColor(hex, percent) {
   return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
 }
 
+// Visual shown when a product has no image, or its image fails to load.
+// Phones get the branded SVG mockup (optionally recoloured to a chosen hex);
+// accessories get a tidy text placeholder (a phone mockup would look wrong).
+function mediaFallback(p, bodyHex) {
+  const cat = p.category || 'smartphone';
+  if (cat === 'smartphone') {
+    const ff = p.form_factor || 'bar';
+    if (ff === 'fold') return svgFold(p, bodyHex);
+    if (ff === 'flip') return svgFlip(p, bodyHex);
+    return svgBar(p, bodyHex);
+  }
+  return `<div class="media-noimg"><span>${escapeHtml(p.brand)} ${escapeHtml(p.name)}</span></div>`;
+}
+
 function phoneVisual(p) {
   if (p.image_url) {
-    return `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.classList.add('img-failed');this.remove();"/>`;
+    return `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy" referrerpolicy="no-referrer" />`;
   }
-  const ff = p.form_factor || 'bar';
-  if (ff === 'fold') return svgFold(p);
-  if (ff === 'flip') return svgFlip(p);
-  return svgBar(p);
+  return mediaFallback(p);
 }
 
 function discountPct(price, mrp) {
@@ -561,6 +575,25 @@ async function loadFullCatalog() {
   attachFilters(data, initialCat);
 }
 
+// Swap any product image that fails to load for the branded fallback visual,
+// so a blocked / hotlink-protected URL never shows as a broken image.
+function wireImageFallback(scope, items) {
+  const cards = scope.querySelectorAll('.product-card');
+  items.forEach((p, i) => {
+    const card = cards[i];
+    const img = card && card.querySelector('.product-media img');
+    if (!img) return;
+    const fail = () => {
+      const media = img.closest('.product-media');
+      if (!media || media.querySelector('.media-fallback-wrap')) return;
+      img.style.display = 'none';
+      media.insertAdjacentHTML('beforeend', `<div class="media-fallback-wrap">${mediaFallback(p)}</div>`);
+    };
+    img.addEventListener('error', fail, { once: true });
+    if (img.complete && img.naturalWidth === 0) fail();
+  });
+}
+
 function renderCatalog(items) {
   const grid = document.getElementById('product-grid');
   if (!grid) return;
@@ -571,6 +604,7 @@ function renderCatalog(items) {
   grid.innerHTML = items.map(productCard).join('');
   attachFavToggle(grid);
   wireCardClicks(grid, items);
+  wireImageFallback(grid, items);
   document.dispatchEvent(new CustomEvent('catalog:rendered', { detail: { grid } }));
 }
 
@@ -643,6 +677,7 @@ async function loadFeatured() {
   grid.innerHTML = data.map(productCard).join('');
   attachFavToggle(grid);
   wireCardClicks(grid, data);
+  wireImageFallback(grid, data);
   document.dispatchEvent(new CustomEvent('catalog:rendered', { detail: { grid } }));
 }
 
@@ -768,7 +803,7 @@ function renderProductDetail(p) {
   const galleryHtml = gallery.length ? `
     <div class="pdp-gallery">
       <div class="pdp-stage">
-        <img id="pdp-main-img" src="${escapeHtml(gallery[0])}" alt="${escapeHtml(title)}" referrerpolicy="no-referrer" loading="eager" data-fallback="${escapeHtml(gallery[0])}" onerror="if(this.src!==this.dataset.fallback){this.src=this.dataset.fallback;}" />
+        <img id="pdp-main-img" src="${escapeHtml(gallery[0])}" alt="${escapeHtml(title)}" referrerpolicy="no-referrer" loading="eager" />
       </div>
       ${gallery.length > 1 ? `
         <div class="pdp-thumbs">
@@ -777,14 +812,14 @@ function renderProductDetail(p) {
               <img src="${escapeHtml(src)}" alt="" referrerpolicy="no-referrer" loading="lazy" />
             </button>`).join('')}
         </div>` : ''}
-    </div>` : `<div class="pdp-gallery"><div class="pdp-stage"><div class="pdp-noimg">No image available</div></div></div>`;
+    </div>` : `<div class="pdp-gallery"><div class="pdp-stage"><div class="media-fallback-wrap pdp-fallback">${mediaFallback(p)}</div></div></div>`;
 
   const colorsHtml = colors.length ? `
     <section class="pdp-section">
       <h3 class="pdp-section-title">Colour <span class="pdp-section-value" id="pdp-color-name">${escapeHtml(colors[0].name || '')}</span></h3>
       <div class="pdp-swatches">
         ${colors.map((c, i) => `
-          <button class="pdp-swatch ${i === 0 ? 'active' : ''}" data-name="${escapeHtml(c.name || '')}" data-image="${escapeHtml(c.image_url || '')}" aria-label="${escapeHtml(c.name || '')}" title="${escapeHtml(c.name || '')}">
+          <button class="pdp-swatch ${i === 0 ? 'active' : ''}" data-name="${escapeHtml(c.name || '')}" data-image="${escapeHtml(c.image_url || '')}" data-hex="${escapeHtml(c.hex || '')}" aria-label="${escapeHtml(c.name || '')}" title="${escapeHtml(c.name || '')}">
             <span class="pdp-swatch-dot" style="background:${escapeHtml(c.hex || '#999')}"></span>
             <span class="pdp-swatch-label">${escapeHtml(c.name || '')}</span>
           </button>`).join('')}
@@ -865,6 +900,30 @@ function renderProductDetail(p) {
 
   // Wire up gallery thumbnails
   const mainImg = document.getElementById('pdp-main-img');
+  const stage = root.querySelector('.pdp-stage');
+  // Many catalogue image URLs are hotlink-blocked and fail to load. Instead of
+  // a broken image, reveal the branded mockup — recoloured (hex) to the chosen
+  // colour so colour switching is always visible even without real photos.
+  const showFallback = (hex) => {
+    if (!stage) return;
+    if (mainImg) mainImg.style.display = 'none';
+    let fb = stage.querySelector('.media-fallback-wrap');
+    if (!fb) {
+      stage.insertAdjacentHTML('beforeend', '<div class="media-fallback-wrap pdp-fallback"></div>');
+      fb = stage.querySelector('.media-fallback-wrap');
+    }
+    fb.innerHTML = mediaFallback(p, hex);
+  };
+  const clearFallback = () => {
+    if (mainImg) mainImg.style.display = '';
+    const fb = stage && stage.querySelector('.media-fallback-wrap');
+    if (fb) fb.remove();
+  };
+  if (mainImg) {
+    mainImg.addEventListener('error', () => showFallback(root.querySelector('.pdp-swatch.active')?.dataset.hex || ''));
+    mainImg.addEventListener('load', clearFallback);
+    if (mainImg.complete && mainImg.naturalWidth === 0) showFallback(colors[0]?.hex || '');
+  }
   root.querySelectorAll('.pdp-thumb').forEach((t) => {
     t.addEventListener('click', () => {
       root.querySelectorAll('.pdp-thumb').forEach((x) => x.classList.remove('active'));
@@ -893,9 +952,14 @@ function renderProductDetail(p) {
       root.querySelectorAll('.pdp-swatch').forEach((x) => x.classList.remove('active'));
       sw.classList.add('active');
       if (colorName) colorName.textContent = sw.dataset.name || '';
-      if (mainImg) {
-        const colourImg = sw.dataset.image || '';
+      const colourImg = sw.dataset.image || '';
+      const hex = sw.dataset.hex || '';
+      if (mainImg && (colourImg || fallbackImg)) {
+        clearFallback();
         mainImg.src = colourImg || fallbackImg;
+        if (mainImg.complete && mainImg.naturalWidth === 0) showFallback(hex);
+      } else {
+        showFallback(hex);
       }
       updateWa();
     });
