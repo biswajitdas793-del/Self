@@ -15,7 +15,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&':'&amp;','<'
 
 let products = [];
 let editingId = null;
-let pendingPhotoUrl = null;
+let pendingPhotos = [];
 let photoChanged = false;
 let soldProduct = null;
 let salesChart = null;
@@ -25,7 +25,7 @@ let currentRange = 'month';
 /* ---------------- boot ---------------- */
 init();
 async function init() {
-  wireLogin(); wireTabs(); wireEditor(); wireSold(); wireProductsBar(); wireSalesRange(); wirePassword();
+  wireLogin(); wireTabs(); wireEditor(); wireSold(); wireProductsBar(); wireSalesRange(); wirePassword(); wireTiers();
   const { data: { session } } = await supabase.auth.getSession();
   session ? showApp() : showLogin();
   supabase.auth.onAuthStateChange((event) => {
@@ -172,13 +172,15 @@ function wireEditor() {
   $('#add-product-btn').addEventListener('click', () => openEditor(null));
   $$('[data-close-editor]').forEach((b) => b.addEventListener('click', closeEditor));
   $('#photo-btn').addEventListener('click', () => $('#photo-input').click());
-  $('#photo-input').addEventListener('change', (e) => handlePhoto(e.target.files[0]));
+  $('#photo-input').addEventListener('change', (e) => handlePhotos(e.target.files));
   $('#product-form').addEventListener('submit', saveProduct);
 }
 
 function openEditor(p) {
   editingId = p ? p.id : null;
-  pendingPhotoUrl = p?.image_url || null;
+  pendingPhotos = (Array.isArray(p?.gallery_urls) && p.gallery_urls.length)
+    ? [...p.gallery_urls]
+    : (p?.image_url ? [p.image_url] : []);
   photoChanged = false;
   $('#editor-title').textContent = p ? 'Edit product' : 'Add product';
   $('#f-brand').value = p?.brand || '';
@@ -190,38 +192,112 @@ function openEditor(p) {
   $('#f-instock').checked = p ? (p.in_stock !== false) : true;
   $('#f-new').checked = !!p?.is_new;
   $('#f-featured').checked = !!p?.featured;
-  $('#f-colors').value = Array.isArray(p?.color_options) ? p.color_options.map((c) => c.name).filter(Boolean).join(', ') : '';
+  // Roundtrip "Name:#hex" so existing hex swatches are preserved when re-saving.
+  $('#f-colors').value = Array.isArray(p?.color_options)
+    ? p.color_options.filter((c) => c?.name).map((c) => (c.hex && /^#[0-9a-fA-F]{3,8}$/.test(c.hex)) ? `${c.name}:${c.hex}` : c.name).join(', ')
+    : '';
   $('#f-highlights').value = Array.isArray(p?.highlights) ? p.highlights.join('\n') : '';
-  $('#photo-hint').textContent = 'Pick from gallery — auto-compressed before saving.';
-  setPhotoPreview(pendingPhotoUrl);
+  $('#photo-hint').textContent = 'First photo is the cover. Auto-compressed before saving.';
+  renderPhotoGallery();
+  renderTiers(p?.storage_options);
   $('#editor-error').hidden = true;
   $('#editor').hidden = false;
 }
 function closeEditor() { $('#editor').hidden = true; $('#photo-input').value = ''; }
 
-function setPhotoPreview(url) {
-  $('#photo-preview').innerHTML = url ? `<img src="${esc(url)}" alt=""/>` : '<span>No photo</span>';
+function renderPhotoGallery() {
+  const wrap = $('#photo-gallery');
+  if (!pendingPhotos.length) {
+    wrap.innerHTML = '<div class="photo-empty">No photos yet</div>';
+    return;
+  }
+  wrap.innerHTML = pendingPhotos.map((url, i) => `
+    <div class="photo-thumb${i === 0 ? ' cover' : ''}" data-i="${i}">
+      <img src="${esc(url)}" alt="" referrerpolicy="no-referrer" />
+      ${i === 0 ? '<span class="photo-cover-tag">Cover</span>' : ''}
+      <button type="button" class="photo-remove" data-act="remove" data-i="${i}" aria-label="Remove">×</button>
+      ${i > 0 ? `<button type="button" class="photo-cover-btn" data-act="cover" data-i="${i}">Set cover</button>` : ''}
+    </div>`).join('');
+  wrap.querySelectorAll('[data-act=remove]').forEach((b) => b.addEventListener('click', () => {
+    pendingPhotos.splice(+b.dataset.i, 1);
+    photoChanged = true;
+    renderPhotoGallery();
+  }));
+  wrap.querySelectorAll('[data-act=cover]').forEach((b) => b.addEventListener('click', () => {
+    const i = +b.dataset.i; if (i <= 0) return;
+    const [pick] = pendingPhotos.splice(i, 1);
+    pendingPhotos.unshift(pick);
+    photoChanged = true;
+    renderPhotoGallery();
+  }));
 }
 
-async function handlePhoto(file) {
-  if (!file) return;
+// Storage tier (per-variant pricing) editor. Reads/writes rows of {label, price_inr, mrp_inr}
+// straight to the product's storage_options jsonb column.
+function wireTiers() {
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'tier-add') {
+      e.preventDefault();
+      addTierRow({});
+    }
+  });
+}
+function addTierRow(t) {
+  const list = $('#tier-list');
+  if (!list) return;
+  const row = document.createElement('div');
+  row.className = 'tier-row';
+  row.innerHTML = `
+    <input type="text" class="tier-label" placeholder="128 GB" value="${esc(t.label || '')}" />
+    <input type="number" class="tier-price" min="0" placeholder="Selling ₹" value="${t.price_inr ?? ''}" />
+    <input type="number" class="tier-mrp" min="0" placeholder="MRP ₹" value="${t.mrp_inr ?? ''}" />
+    <button type="button" class="mini danger" data-act="tier-remove" aria-label="Remove tier">×</button>`;
+  row.querySelector('[data-act=tier-remove]').addEventListener('click', () => row.remove());
+  list.appendChild(row);
+}
+function renderTiers(tiers) {
+  const list = $('#tier-list');
+  if (!list) return;
+  list.innerHTML = '';
+  (Array.isArray(tiers) ? tiers : []).forEach(addTierRow);
+}
+function readTiers() {
+  return $$('#tier-list .tier-row').map((r) => {
+    const label = r.querySelector('.tier-label').value.trim();
+    const priceVal = r.querySelector('.tier-price').value;
+    const mrpVal = r.querySelector('.tier-mrp').value;
+    const price = priceVal === '' ? null : parseInt(priceVal, 10);
+    const mrp = mrpVal === '' ? null : parseInt(mrpVal, 10);
+    if (!label && price == null && mrp == null) return null;
+    return { label, price_inr: Number.isFinite(price) ? price : null, mrp_inr: Number.isFinite(mrp) ? mrp : null };
+  }).filter(Boolean);
+}
+
+async function handlePhotos(files) {
+  if (!files || !files.length) return;
   const hint = $('#photo-hint');
-  hint.textContent = 'Compressing…';
-  try {
-    const blob = await compressImage(file, 1000, 0.82);
-    hint.textContent = 'Uploading…';
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
-    const { error } = await supabase.storage.from('product-images')
-      .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
-    if (error) throw error;
-    pendingPhotoUrl = supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl;
-    photoChanged = true;
-    setPhotoPreview(pendingPhotoUrl);
-    hint.textContent = 'Photo ready ✓';
-  } catch (err) {
-    hint.textContent = 'Upload failed — try again.';
-    toast('Photo upload failed', true);
+  for (const file of files) {
+    hint.textContent = `Compressing ${file.name}…`;
+    try {
+      const blob = await compressImage(file, 1000, 0.82);
+      hint.textContent = `Uploading ${file.name}…`;
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const { error } = await supabase.storage.from('product-images')
+        .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+      if (error) throw error;
+      const publicUrl = supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+      pendingPhotos.push(publicUrl);
+      photoChanged = true;
+      renderPhotoGallery();
+      hint.textContent = `Added ✓ (${pendingPhotos.length} photo${pendingPhotos.length === 1 ? '' : 's'})`;
+    } catch (err) {
+      console.error('Photo upload error:', err);
+      hint.textContent = 'Upload failed — try again.';
+      toast('Photo upload failed', true);
+    }
   }
+  // Reset file input so the same file can be re-picked if needed.
+  $('#photo-input').value = '';
 }
 
 function compressImage(file, maxW, quality) {
@@ -250,8 +326,21 @@ async function saveProduct(e) {
   const price = parseInt($('#f-price').value, 10);
   if (isNaN(price)) { err.textContent = 'Enter a selling price.'; err.hidden = false; return; }
   const mrp = $('#f-mrp').value ? parseInt($('#f-mrp').value, 10) : null;
-  const colors = $('#f-colors').value.split(',').map((s) => s.trim()).filter(Boolean).map((n) => ({ name: n }));
+  // Parse "Name" or "Name:#HEX" entries. For plain names we look up the existing
+  // hex/image_url by name so re-saving never silently drops swatch data.
+  const existingColors = editingId ? (products.find((x) => x.id === editingId)?.color_options || []) : [];
+  const colors = $('#f-colors').value.split(',').map((s) => s.trim()).filter(Boolean).map((part) => {
+    const m = part.match(/^(.+?)\s*:\s*(#[0-9a-fA-F]{3,8})\s*$/);
+    if (m) {
+      const cname = m[1].trim(), hex = m[2];
+      const existing = existingColors.find((c) => c.name && c.name.toLowerCase() === cname.toLowerCase());
+      return existing ? { ...existing, name: cname, hex } : { name: cname, hex };
+    }
+    const existing = existingColors.find((c) => c.name && c.name.toLowerCase() === part.toLowerCase());
+    return existing ? existing : { name: part };
+  });
   const highlights = $('#f-highlights').value.split('\n').map((s) => s.trim()).filter(Boolean);
+  const tiers = readTiers();
 
   const rec = {
     brand, name,
@@ -262,13 +351,14 @@ async function saveProduct(e) {
     in_stock: $('#f-instock').checked,
     is_new: $('#f-new').checked,
     featured: $('#f-featured').checked,
-    image_url: pendingPhotoUrl || null,
+    image_url: pendingPhotos[0] || null,
+    gallery_urls: pendingPhotos,
     color_options: colors,
+    storage_options: tiers,
     highlights,
     flipkart_query: `${brand} ${name}`,
     amazon_query: `${brand} ${name}`
   };
-  if (photoChanged && pendingPhotoUrl) rec.gallery_urls = [pendingPhotoUrl];
 
   const btn = $('#save-product-btn'); btn.disabled = true; btn.textContent = 'Saving…';
   let resp;
@@ -276,7 +366,6 @@ async function saveProduct(e) {
     resp = await supabase.from('products').update(rec).eq('id', editingId);
   } else {
     rec.sort_order = 900;
-    if (!rec.gallery_urls) rec.gallery_urls = pendingPhotoUrl ? [pendingPhotoUrl] : [];
     resp = await supabase.from('products').insert(rec);
   }
   btn.disabled = false; btn.textContent = 'Save';

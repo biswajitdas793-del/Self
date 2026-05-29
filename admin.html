@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/admin.css?v=4">
+<link rel="stylesheet" href="assets/css/admin.css?v=5">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F5295B'/%3E%3Ctext x='32' y='42' font-family='Poppins,Arial' font-size='30' font-weight='800' text-anchor='middle' fill='white'%3EN%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -104,12 +104,12 @@
       <button type="button" class="icon-btn" data-close-editor>✕</button>
     </div>
     <div class="drawer-body">
-      <div class="photo-field">
-        <div class="photo-preview" id="photo-preview"><span>No photo</span></div>
-        <div>
-          <input type="file" id="photo-input" accept="image/*" hidden />
-          <button type="button" class="btn btn-ghost" id="photo-btn">Upload photo</button>
-          <p class="hint" id="photo-hint">Pick from gallery — auto-compressed before saving.</p>
+      <div class="photo-field photo-field-multi">
+        <div id="photo-gallery" class="photo-gallery"><div class="photo-empty">No photos yet</div></div>
+        <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp" multiple hidden />
+        <div class="photo-actions">
+          <button type="button" class="btn btn-ghost" id="photo-btn">+ Add photo</button>
+          <p class="hint" id="photo-hint">First photo is the cover. Up to 5 MB each — auto-compressed before saving.</p>
         </div>
       </div>
 
@@ -148,9 +148,17 @@
 
       <details class="advanced">
         <summary>Advanced (optional)</summary>
-        <label>Colours <span class="hint">comma separated, e.g. Black, Silver, Blue</span>
-          <input type="text" id="f-colors" placeholder="Black, Silver, Blue" />
+        <label>Colours <span class="hint">comma separated. Optionally specify hex: <code>Black:#1A1A1A, Silver:#C0C0C0</code></span>
+          <input type="text" id="f-colors" placeholder="Black, Silver, Graphite" />
         </label>
+        <div class="tiers-field">
+          <div class="tiers-head">
+            <strong>Storage tiers &amp; pricing</strong>
+            <button type="button" class="mini" id="tier-add">+ Add tier</button>
+          </div>
+          <p class="hint">Per-variant pricing shown on the product page. Leave empty if there are no storage variants.</p>
+          <div id="tier-list"></div>
+        </div>
         <label>Highlights <span class="hint">one per line</span>
           <textarea id="f-highlights" rows="3" placeholder="120Hz display&#10;5000mAh battery"></textarea>
         </label>
@@ -214,6 +222,6 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script type="module" src="assets/js/admin.js?v=3"></script>
+<script type="module" src="assets/js/admin.js?v=4"></script>
 </body>
 </html>
