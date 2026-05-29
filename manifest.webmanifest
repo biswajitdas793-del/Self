@@ -1,0 +1,14 @@
+{
+  "name": "Namaskar Telecom",
+  "short_name": "Namaskar",
+  "description": "Latest smartphones, accessories and trusted service — Namaskar Telecom.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08080A",
+  "theme_color": "#19B98A",
+  "icons": [
+    { "src": "/assets/og.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ]
+}
