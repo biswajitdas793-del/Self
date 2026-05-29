@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#08080A"/>
+      <stop offset="1" stop-color="#16161B"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#19B98A" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#19B98A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="980" cy="220" r="360" fill="url(#glow)"/>
+  <g transform="translate(96, 96)">
+    <rect width="84" height="84" rx="22" fill="#19B98A"/>
+    <text x="42" y="62" font-family="'Space Grotesk', Inter, Arial, sans-serif" font-size="50" font-weight="800" fill="#04130D" text-anchor="middle">N</text>
+  </g>
+  <text x="96" y="320" font-family="'Space Grotesk', Inter, Arial, sans-serif" font-size="72" font-weight="700" fill="#F4F2F6" letter-spacing="-1">Namaskar Telecom</text>
+  <text x="96" y="384" font-family="Inter, Arial, sans-serif" font-size="30" fill="#B4B0BC">Latest smartphones, accessories &amp; trusted service.</text>
+  <text x="96" y="424" font-family="Inter, Arial, sans-serif" font-size="22" fill="#76727F">Apple · Samsung · OnePlus · Xiaomi · Vivo · OPPO · realme</text>
+  <g transform="translate(96, 488)">
+    <rect width="340" height="62" rx="31" fill="#19B98A"/>
+    <text x="170" y="40" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#04130D" text-anchor="middle">namaskar-telecom.vercel.app</text>
+  </g>
+  <text x="1104" y="586" font-family="Inter, Arial, sans-serif" font-size="20" fill="#76727F" text-anchor="end">WhatsApp +91 80822 20143</text>
+</svg>

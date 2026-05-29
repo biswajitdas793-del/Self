@@ -767,9 +767,69 @@ function categoryLabel(cat) {
   return CATEGORY_LABELS[cat] || 'Products';
 }
 
+// Per-product head metadata: canonical, OG/Twitter, and Product JSON-LD. Lets
+// shared links preview correctly and gives Google enough to surface the PDP in
+// search with price + availability.
+function updateProductHeadMeta(p, title) {
+  const SITE = 'https://namaskar-telecom.vercel.app';
+  const url = `${SITE}/product.html?id=${p.id}`;
+  const descRaw = p.description || 'Specifications, variants and pricing at Namaskar Telecom.';
+  const desc = descRaw.replace(/\s+/g, ' ').slice(0, 220);
+  const image = p.image_url || `${SITE}/assets/og.svg`;
+  const setMeta = (selector, value) => {
+    const el = document.querySelector(selector);
+    if (el) el.setAttribute('content', value);
+  };
+  setMeta('meta[property="og:title"]', `${title} — Namaskar Telecom`);
+  setMeta('meta[property="og:description"]', desc);
+  setMeta('meta[property="og:url"]', url);
+  setMeta('meta[property="og:image"]', image);
+  setMeta('meta[name="twitter:title"]', `${title} — Namaskar Telecom`);
+  setMeta('meta[name="twitter:description"]', desc);
+  setMeta('meta[name="twitter:image"]', image);
+  setMeta('meta[name="description"]', desc);
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.setAttribute('href', url);
+
+  const storage = Array.isArray(p.storage_options) ? p.storage_options : [];
+  const tierPrices = storage.map((t) => Number(t.price_inr)).filter((n) => Number.isFinite(n) && n > 0);
+  const offers = tierPrices.length
+    ? {
+        '@type': 'AggregateOffer',
+        priceCurrency: 'INR',
+        lowPrice: Math.min(...tierPrices),
+        highPrice: Math.max(...tierPrices),
+        offerCount: tierPrices.length,
+        availability: 'https://schema.org/InStock',
+        seller: { '@type': 'Organization', name: 'Namaskar Telecom' }
+      }
+    : {
+        '@type': 'Offer',
+        url,
+        priceCurrency: 'INR',
+        price: Number(p.price_inr) || 0,
+        availability: 'https://schema.org/InStock',
+        seller: { '@type': 'Organization', name: 'Namaskar Telecom' }
+      };
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: title,
+    description: desc,
+    image: p.image_url ? [p.image_url] : [`${SITE}/assets/og.svg`],
+    brand: { '@type': 'Brand', name: p.brand },
+    sku: `nt-${p.id}`,
+    category: p.category || 'smartphone',
+    offers
+  };
+  const slot = document.getElementById('product-jsonld');
+  if (slot) slot.textContent = JSON.stringify(ld);
+}
+
 function renderProductDetail(p) {
   const title = `${p.brand} ${p.name}`;
   document.title = `${title} — Namaskar Telecom`;
+  updateProductHeadMeta(p, title);
   const crumbs = document.getElementById('pdp-crumbs');
   if (crumbs) {
     const catUrl = `products.html?category=${encodeURIComponent(p.category || 'smartphone')}`;
