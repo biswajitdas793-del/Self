@@ -238,7 +238,8 @@ function mediaFallback(p, bodyHex) {
 
 function phoneVisual(p) {
   if (p.image_url) {
-    return `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy" referrerpolicy="no-referrer" />`;
+    const alt = `${p.brand} ${p.name}`;
+    return `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(alt)}" loading="lazy" referrerpolicy="no-referrer" />`;
   }
   return mediaFallback(p);
 }
@@ -293,8 +294,9 @@ function shortProcessor(s) {
 function productCard(p) {
   const disc = discountPct(p.price_inr, p.mrp_inr);
   const title = `${p.name}${p.storage ? ' ' + p.storage : ''}`;
-  const searchQ = p.flipkart_query || title;
-  const waMsg = `Hi Namaskar Telecom, is the ${title} available?`;
+  const fullTitle = `${p.brand} ${title}`;
+  const searchQ = p.flipkart_query || fullTitle;
+  const waMsg = `Hi Namaskar Telecom, is the ${fullTitle} available?`;
   const desc = p.description ? `<p class="product-desc">${escapeHtml(p.description)}</p>` : '';
   // Phone-only spec row. For accessories we lean on the description + highlights instead.
   const isPhone = (p.category || 'smartphone') === 'smartphone';
