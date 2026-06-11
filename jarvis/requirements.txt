@@ -1,0 +1,6 @@
+numpy>=1.24,<3
+sounddevice>=0.4.6,<0.6
+python-dotenv>=1.0,<2
+# Cross-platform offline TTS fallback. Native tools (macOS `say`, Windows
+# System.Speech, Linux espeak/spd-say) are used first when available.
+pyttsx3>=2.90,<3
