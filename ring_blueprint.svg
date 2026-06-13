@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900"
+     font-family="'Courier New', monospace">
+
+  <!-- Background -->
+  <rect width="1200" height="900" fill="#f0f0e8"/>
+
+  <!-- Title Block -->
+  <rect x="20" y="20" width="1160" height="60" fill="#1a1a2e" rx="4"/>
+  <text x="600" y="45" text-anchor="middle" fill="#d4af37" font-size="18" font-weight="bold">GOLDSMITH TECHNICAL BLUEPRINT — DUAL ENAMEL CHANNEL BAND RING</text>
+  <text x="600" y="68" text-anchor="middle" fill="#aaaaaa" font-size="11">Material: 18K Yellow Gold (750) | Black Vitreous Enamel Inlay | Scale: Indicative (all dims in mm)</text>
+
+  <!-- ═══════════════════════════════════════════════════════
+       VIEW 1 — FRONT FACE (Top-down bore view)
+       ═══════════════════════════════════════════════════════ -->
+  <g transform="translate(160,160)">
+    <text x="0" y="-30" text-anchor="middle" fill="#1a1a2e" font-size="13" font-weight="bold">VIEW 1 — TOP / BORE VIEW</text>
+
+    <!-- Outer ring silhouette -->
+    <circle cx="0" cy="0" r="110" fill="none" stroke="#8B6914" stroke-width="2" stroke-dasharray="6,3"/>
+    <!-- Outer gold band outer edge -->
+    <circle cx="0" cy="0" r="105" fill="#d4af37" stroke="#8B6914" stroke-width="1.5"/>
+    <!-- Outer enamel band outer boundary -->
+    <circle cx="0" cy="0" r="96" fill="#22223b" stroke="#8B6914" stroke-width="0.8"/>
+    <!-- Inner enamel band inner boundary / gold divider outer -->
+    <circle cx="0" cy="0" r="90" fill="#d4af37" stroke="#8B6914" stroke-width="0.8"/>
+    <!-- Second enamel channel -->
+    <circle cx="0" cy="0" r="90" fill="#d4af37"/>
+    <circle cx="0" cy="0" r="84" fill="#22223b" stroke="#8B6914" stroke-width="0.8"/>
+    <!-- Inner gold border -->
+    <circle cx="0" cy="0" r="77" fill="#d4af37" stroke="#8B6914" stroke-width="0.8"/>
+    <!-- Bore (inside) -->
+    <circle cx="0" cy="0" r="70" fill="#c8a415" stroke="#6b4f10" stroke-width="1.5"/>
+    <!-- Bore interior sheen -->
+    <circle cx="0" cy="0" r="68" fill="none" stroke="#f0d060" stroke-width="2" opacity="0.5"/>
+
+    <!-- Starburst engravings on gold rail — top position -->
+    <g transform="translate(0,-100)">
+      <line x1="0" y1="-5" x2="0" y2="5" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-5" y1="0" x2="5" y2="0" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-3.5" y1="-3.5" x2="3.5" y2="3.5" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="3.5" y1="-3.5" x2="-3.5" y2="3.5" stroke="#6b4f10" stroke-width="1"/>
+    </g>
+    <!-- Starburst — right -->
+    <g transform="translate(100,0)">
+      <line x1="0" y1="-5" x2="0" y2="5" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-5" y1="0" x2="5" y2="0" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-3.5" y1="-3.5" x2="3.5" y2="3.5" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="3.5" y1="-3.5" x2="-3.5" y2="3.5" stroke="#6b4f10" stroke-width="1"/>
+    </g>
+    <!-- Starburst — bottom -->
+    <g transform="translate(0,100)">
+      <line x1="0" y1="-5" x2="0" y2="5" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-5" y1="0" x2="5" y2="0" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-3.5" y1="-3.5" x2="3.5" y2="3.5" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="3.5" y1="-3.5" x2="-3.5" y2="3.5" stroke="#6b4f10" stroke-width="1"/>
+    </g>
+    <!-- Starburst — left -->
+    <g transform="translate(-100,0)">
+      <line x1="0" y1="-5" x2="0" y2="5" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-5" y1="0" x2="5" y2="0" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-3.5" y1="-3.5" x2="3.5" y2="3.5" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="3.5" y1="-3.5" x2="-3.5" y2="3.5" stroke="#6b4f10" stroke-width="1"/>
+    </g>
+
+    <!-- Dimension: Outer diameter -->
+    <line x1="-105" y1="-120" x2="105" y2="-120" stroke="#cc0000" stroke-width="1"/>
+    <line x1="-105" y1="-105" x2="-105" y2="-125" stroke="#cc0000" stroke-width="1"/>
+    <line x1="105" y1="-105" x2="105" y2="-125" stroke="#cc0000" stroke-width="1"/>
+    <text x="0" y="-126" text-anchor="middle" fill="#cc0000" font-size="10">Ø 21.0 mm (outer)</text>
+
+    <!-- Dimension: Bore diameter -->
+    <line x1="-70" y1="80" x2="70" y2="80" stroke="#0055cc" stroke-width="1"/>
+    <line x1="-70" y1="70" x2="-70" y2="85" stroke="#0055cc" stroke-width="1"/>
+    <line x1="70" y1="70" x2="70" y2="85" stroke="#0055cc" stroke-width="1"/>
+    <text x="0" y="95" text-anchor="middle" fill="#0055cc" font-size="10">Ø 14.0 mm (bore / inner)</text>
+
+    <!-- Wall thickness label -->
+    <line x1="105" y1="30" x2="145" y2="50" stroke="#555" stroke-width="0.8"/>
+    <text x="148" y="54" fill="#333" font-size="9">Wall = 3.5 mm</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════════════
+       VIEW 2 — SIDE ELEVATION (band profile)
+       ═══════════════════════════════════════════════════════ -->
+  <g transform="translate(540,200)">
+    <text x="130" y="-30" text-anchor="middle" fill="#1a1a2e" font-size="13" font-weight="bold">VIEW 2 — SIDE ELEVATION (UNWRAPPED FACE)</text>
+
+    <!-- Full band rectangle (gold) -->
+    <rect x="0" y="0" width="260" height="120" fill="#d4af37" stroke="#8B6914" stroke-width="2"/>
+
+    <!-- Top enamel channel -->
+    <rect x="0" y="22" width="260" height="30" fill="#22223b" stroke="#555" stroke-width="0.5"/>
+    <!-- Middle gold divider -->
+    <rect x="0" y="52" width="260" height="16" fill="#d4af37" stroke="#8B6914" stroke-width="0.5"/>
+    <!-- Bottom enamel channel -->
+    <rect x="0" y="68" width="260" height="30" fill="#22223b" stroke="#555" stroke-width="0.5"/>
+
+    <!-- Starburst at left top rail -->
+    <g transform="translate(20,11)">
+      <line x1="0" y1="-7" x2="0" y2="7" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="-7" y1="0" x2="7" y2="0" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="-5" y1="-5" x2="5" y2="5" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="5" y1="-5" x2="-5" y2="5" stroke="#6b4f10" stroke-width="1.2"/>
+    </g>
+    <!-- Starburst at right top rail -->
+    <g transform="translate(240,11)">
+      <line x1="0" y1="-7" x2="0" y2="7" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="-7" y1="0" x2="7" y2="0" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="-5" y1="-5" x2="5" y2="5" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="5" y1="-5" x2="-5" y2="5" stroke="#6b4f10" stroke-width="1.2"/>
+    </g>
+    <!-- Starburst bottom rail left -->
+    <g transform="translate(20,109)">
+      <line x1="0" y1="-7" x2="0" y2="7" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="-7" y1="0" x2="7" y2="0" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="-5" y1="-5" x2="5" y2="5" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="5" y1="-5" x2="-5" y2="5" stroke="#6b4f10" stroke-width="1.2"/>
+    </g>
+    <!-- Starburst bottom rail right -->
+    <g transform="translate(240,109)">
+      <line x1="0" y1="-7" x2="0" y2="7" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="-7" y1="0" x2="7" y2="0" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="-5" y1="-5" x2="5" y2="5" stroke="#6b4f10" stroke-width="1.2"/>
+      <line x1="5" y1="-5" x2="-5" y2="5" stroke="#6b4f10" stroke-width="1.2"/>
+    </g>
+
+    <!-- Repeating starburst at 60mm intervals along top rail -->
+    <g transform="translate(80,11)">
+      <line x1="0" y1="-6" x2="0" y2="6" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-6" y1="0" x2="6" y2="0" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-4" y1="-4" x2="4" y2="4" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="4" y1="-4" x2="-4" y2="4" stroke="#6b4f10" stroke-width="1"/>
+    </g>
+    <g transform="translate(140,11)">
+      <line x1="0" y1="-6" x2="0" y2="6" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-6" y1="0" x2="6" y2="0" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-4" y1="-4" x2="4" y2="4" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="4" y1="-4" x2="-4" y2="4" stroke="#6b4f10" stroke-width="1"/>
+    </g>
+    <g transform="translate(200,11)">
+      <line x1="0" y1="-6" x2="0" y2="6" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-6" y1="0" x2="6" y2="0" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="-4" y1="-4" x2="4" y2="4" stroke="#6b4f10" stroke-width="1"/>
+      <line x1="4" y1="-4" x2="-4" y2="4" stroke="#6b4f10" stroke-width="1"/>
+    </g>
+
+    <!-- Dimension lines: HEIGHT (band width) -->
+    <line x1="-20" y1="0" x2="-20" y2="120" stroke="#cc0000" stroke-width="1"/>
+    <line x1="-25" y1="0" x2="-10" y2="0" stroke="#cc0000" stroke-width="1"/>
+    <line x1="-25" y1="120" x2="-10" y2="120" stroke="#cc0000" stroke-width="1"/>
+    <text x="-28" y="64" text-anchor="middle" fill="#cc0000" font-size="10" transform="rotate(-90,-28,64)">8.0 mm (band width)</text>
+
+    <!-- Top gold rail dim -->
+    <line x1="270" y1="0" x2="270" y2="22" stroke="#0055cc" stroke-width="1"/>
+    <line x1="260" y1="0" x2="278" y2="0" stroke="#0055cc" stroke-width="1"/>
+    <line x1="260" y1="22" x2="278" y2="22" stroke="#0055cc" stroke-width="1"/>
+    <text x="282" y="15" fill="#0055cc" font-size="9">1.5mm rail</text>
+
+    <!-- Top enamel channel dim -->
+    <line x1="270" y1="22" x2="270" y2="52" stroke="#9900aa" stroke-width="1"/>
+    <line x1="260" y1="52" x2="278" y2="52" stroke="#9900aa" stroke-width="1"/>
+    <text x="282" y="40" fill="#9900aa" font-size="9">2.0mm enamel</text>
+
+    <!-- Middle divider dim -->
+    <line x1="270" y1="52" x2="270" y2="68" stroke="#0055cc" stroke-width="1"/>
+    <line x1="260" y1="68" x2="278" y2="68" stroke="#0055cc" stroke-width="1"/>
+    <text x="282" y="63" fill="#0055cc" font-size="9">1.0mm divider</text>
+
+    <!-- Bottom enamel channel dim -->
+    <line x1="270" y1="68" x2="270" y2="98" stroke="#9900aa" stroke-width="1"/>
+    <line x1="260" y1="98" x2="278" y2="98" stroke="#9900aa" stroke-width="1"/>
+    <text x="282" y="86" fill="#9900aa" font-size="9">2.0mm enamel</text>
+
+    <!-- Bottom rail dim -->
+    <line x1="270" y1="98" x2="270" y2="120" stroke="#0055cc" stroke-width="1"/>
+    <line x1="260" y1="120" x2="278" y2="120" stroke="#0055cc" stroke-width="1"/>
+    <text x="282" y="112" fill="#0055cc" font-size="9">1.5mm rail</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════════════
+       VIEW 3 — CROSS-SECTION (A-A cut through band)
+       ═══════════════════════════════════════════════════════ -->
+  <g transform="translate(160,560)">
+    <text x="110" y="-15" text-anchor="middle" fill="#1a1a2e" font-size="13" font-weight="bold">VIEW 3 — CROSS-SECTION A-A (through wall)</text>
+
+    <!-- Gold outer shell (cross-section rect) -->
+    <rect x="0" y="0" width="220" height="120" fill="#d4af37" stroke="#8B6914" stroke-width="2"/>
+    <!-- Enamel channel 1 pocket (cut into gold, 1.2mm deep) -->
+    <rect x="0" y="22" width="220" height="30" fill="#22223b" stroke="#333" stroke-width="0.8"/>
+    <!-- Gold middle rail -->
+    <rect x="0" y="52" width="220" height="16" fill="#c8a415" stroke="#8B6914" stroke-width="0.5"/>
+    <!-- Enamel channel 2 -->
+    <rect x="0" y="68" width="220" height="30" fill="#22223b" stroke="#333" stroke-width="0.8"/>
+    <!-- Enamel depth cut indicator (showing recess) -->
+    <rect x="5" y="23" width="210" height="28" fill="none" stroke="#fff" stroke-width="0.5" stroke-dasharray="3,2" opacity="0.4"/>
+    <rect x="5" y="69" width="210" height="28" fill="none" stroke="#fff" stroke-width="0.5" stroke-dasharray="3,2" opacity="0.4"/>
+    <!-- Bore (interior) -->
+    <rect x="40" y="0" width="140" height="120" fill="#c8a415" opacity="0.3"/>
+    <line x1="40" y1="0" x2="40" y2="120" stroke="#6b4f10" stroke-width="2" stroke-dasharray="5,3"/>
+    <line x1="180" y1="0" x2="180" y2="120" stroke="#6b4f10" stroke-width="2" stroke-dasharray="5,3"/>
+    <text x="110" y="65" text-anchor="middle" fill="#6b4f10" font-size="10" font-style="italic">BORE</text>
+
+    <!-- Hatch pattern for gold walls -->
+    <line x1="0" y1="10" x2="10" y2="0" stroke="#8B6914" stroke-width="0.5" opacity="0.5"/>
+    <line x1="0" y1="30" x2="30" y2="0" stroke="#8B6914" stroke-width="0.5" opacity="0.5"/>
+    <line x1="30" y1="120" x2="0" y2="90" stroke="#8B6914" stroke-width="0.5" opacity="0.5"/>
+    <line x1="40" y1="120" x2="0" y2="80" stroke="#8B6914" stroke-width="0.5" opacity="0.5"/>
+    <line x1="220" y1="10" x2="210" y2="0" stroke="#8B6914" stroke-width="0.5" opacity="0.5"/>
+    <line x1="220" y1="30" x2="190" y2="0" stroke="#8B6914" stroke-width="0.5" opacity="0.5"/>
+    <line x1="220" y1="70" x2="180" y2="30" stroke="#8B6914" stroke-width="0.5" opacity="0.5"/>
+    <line x1="220" y1="90" x2="180" y2="50" stroke="#8B6914" stroke-width="0.5" opacity="0.5"/>
+
+    <!-- Wall thickness -->
+    <line x1="0" y1="-15" x2="40" y2="-15" stroke="#cc0000" stroke-width="1"/>
+    <line x1="0" y1="-10" x2="0" y2="-20" stroke="#cc0000" stroke-width="1"/>
+    <line x1="40" y1="-10" x2="40" y2="-20" stroke="#cc0000" stroke-width="1"/>
+    <text x="20" y="-20" text-anchor="middle" fill="#cc0000" font-size="9">3.5mm wall</text>
+
+    <!-- Enamel depth -->
+    <line x1="-20" y1="22" x2="-20" y2="52" stroke="#9900aa" stroke-width="1"/>
+    <line x1="-10" y1="22" x2="-28" y2="22" stroke="#9900aa" stroke-width="1"/>
+    <line x1="-10" y1="52" x2="-28" y2="52" stroke="#9900aa" stroke-width="1"/>
+    <text x="-32" y="40" text-anchor="end" fill="#9900aa" font-size="8">1.2mm depth</text>
+
+    <!-- Band total height -->
+    <line x1="230" y1="0" x2="230" y2="120" stroke="#cc0000" stroke-width="1"/>
+    <line x1="220" y1="0" x2="238" y2="0" stroke="#cc0000" stroke-width="1"/>
+    <line x1="220" y1="120" x2="238" y2="120" stroke="#cc0000" stroke-width="1"/>
+    <text x="242" y="64" text-anchor="start" fill="#cc0000" font-size="9">8.0mm total</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════════════
+       VIEW 4 — STARBURST ENGRAVING DETAIL (enlarged)
+       ═══════════════════════════════════════════════════════ -->
+  <g transform="translate(660,560)">
+    <text x="100" y="-15" text-anchor="middle" fill="#1a1a2e" font-size="13" font-weight="bold">VIEW 4 — STARBURST ENGRAVING DETAIL (×8 scale)</text>
+
+    <!-- Gold rail background -->
+    <rect x="30" y="30" width="140" height="60" fill="#d4af37" stroke="#8B6914" stroke-width="1.5"/>
+    <!-- Engraving (8-point starburst) -->
+    <g transform="translate(100,60)">
+      <!-- 8 rays -->
+      <line x1="0" y1="-28" x2="0" y2="28" stroke="#5a3e00" stroke-width="2.5"/>
+      <line x1="-28" y1="0" x2="28" y2="0" stroke="#5a3e00" stroke-width="2.5"/>
+      <line x1="-20" y1="-20" x2="20" y2="20" stroke="#5a3e00" stroke-width="2"/>
+      <line x1="20" y1="-20" x2="-20" y2="20" stroke="#5a3e00" stroke-width="2"/>
+      <!-- Inner octagon -->
+      <polygon points="0,-10 7,-7 10,0 7,7 0,10 -7,7 -10,0 -7,-7"
+               fill="none" stroke="#5a3e00" stroke-width="1.5"/>
+      <!-- Center dot -->
+      <circle cx="0" cy="0" r="3" fill="#5a3e00"/>
+    </g>
+
+    <!-- Labels -->
+    <text x="100" y="105" text-anchor="middle" fill="#333" font-size="9">8-point starburst, 3.6mm diameter</text>
+    <text x="100" y="118" text-anchor="middle" fill="#333" font-size="9">Engraved 0.3mm deep, burr-finished</text>
+    <text x="100" y="131" text-anchor="middle" fill="#555" font-size="8">Repeat at 45° intervals around band (8× total)</text>
+
+    <!-- Placement guide arrows -->
+    <text x="30" y="20" fill="#666" font-size="8">Placed on top &amp; bottom gold rails</text>
+    <text x="30" y="32" fill="#666" font-size="8">at 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SPECIFICATIONS TABLE (bottom right)
+       ═══════════════════════════════════════════════════════ -->
+  <g transform="translate(870,480)">
+    <rect x="0" y="0" width="310" height="370" fill="#1a1a2e" rx="6" opacity="0.92"/>
+    <text x="155" y="25" text-anchor="middle" fill="#d4af37" font-size="13" font-weight="bold">FULL SPECIFICATIONS</text>
+    <line x1="10" y1="32" x2="300" y2="32" stroke="#d4af37" stroke-width="0.8"/>
+
+    <!-- Spec rows -->
+    <text x="15" y="52" fill="#aaa" font-size="10" font-weight="bold">MATERIAL</text>
+    <text x="15" y="66" fill="#fff" font-size="9">Metal: 18K Yellow Gold (Au 750)</text>
+    <text x="15" y="79" fill="#fff" font-size="9">Fineness: 750/1000 (18 carat)</text>
+    <text x="15" y="92" fill="#fff" font-size="9">Enamel: Black vitreous / cold enamel inlay</text>
+    <text x="15" y="105" fill="#fff" font-size="9">Interior finish: High-polish comfort fit</text>
+
+    <line x1="10" y1="113" x2="300" y2="113" stroke="#444" stroke-width="0.5"/>
+    <text x="15" y="128" fill="#aaa" font-size="10" font-weight="bold">DIMENSIONS</text>
+    <text x="15" y="142" fill="#fff" font-size="9">Ring size: US 9 (inner dia. 18.89 mm → round to 19 mm)</text>
+    <text x="15" y="155" fill="#fff" font-size="9">Inner diameter (bore): 19.0 mm</text>
+    <text x="15" y="168" fill="#fff" font-size="9">Outer diameter: 26.0 mm</text>
+    <text x="15" y="181" fill="#fff" font-size="9">Band width (height): 8.0 mm</text>
+    <text x="15" y="194" fill="#fff" font-size="9">Wall thickness: 3.5 mm</text>
+    <text x="15" y="207" fill="#fff" font-size="9">Top gold rail: 1.5 mm</text>
+    <text x="15" y="220" fill="#fff" font-size="9">Enamel channel 1 width: 2.0 mm</text>
+    <text x="15" y="233" fill="#fff" font-size="9">Middle gold divider: 1.0 mm</text>
+    <text x="15" y="246" fill="#fff" font-size="9">Enamel channel 2 width: 2.0 mm</text>
+    <text x="15" y="259" fill="#fff" font-size="9">Bottom gold rail: 1.5 mm</text>
+    <text x="15" y="272" fill="#fff" font-size="9">Enamel channel depth: 1.2 mm</text>
+    <text x="15" y="285" fill="#fff" font-size="9">Estimated gold weight: ~7.5–9.0 g</text>
+
+    <line x1="10" y1="293" x2="300" y2="293" stroke="#444" stroke-width="0.5"/>
+    <text x="15" y="308" fill="#aaa" font-size="10" font-weight="bold">ENGRAVING</text>
+    <text x="15" y="322" fill="#fff" font-size="9">Pattern: 8-point starburst / sunburst</text>
+    <text x="15" y="335" fill="#fff" font-size="9">Count: 8 per rail × 2 rails = 16 total</text>
+    <text x="15" y="348" fill="#fff" font-size="9">Spacing: Every 45° around circumference</text>
+    <text x="15" y="361" fill="#fff" font-size="9">Depth: 0.3 mm | Diameter: 3.6 mm</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PROCESS NOTES
+       ═══════════════════════════════════════════════════════ -->
+  <g transform="translate(20,750)">
+    <rect x="0" y="0" width="830" height="120" fill="#2a2a2a" rx="4"/>
+    <text x="10" y="18" fill="#d4af37" font-size="11" font-weight="bold">GOLDSMITH PROCESS SEQUENCE</text>
+    <text x="10" y="34" fill="#ccc" font-size="9">1. CASTING/TUBING: Cast or draw 18K yellow gold tube to OD 26mm × ID 19mm × length 8.2mm (allow 0.2mm finishing stock)</text>
+    <text x="10" y="48" fill="#ccc" font-size="9">2. TURNING: Lathe-true outer and bore surfaces. Bore to Ø19.0mm comfort-fit bevel 0.5×45° both edges. Polish bore to mirror.</text>
+    <text x="10" y="62" fill="#ccc" font-size="9">3. MILLING: Mill two circumferential channels 2.0mm wide × 1.2mm deep. Maintain 1.5mm top/bottom rails and 1.0mm centre divider.</text>
+    <text x="10" y="76" fill="#ccc" font-size="9">4. ENGRAVING: Engrave 8-pt starburst (Ø3.6mm, 0.3mm deep) at 45° intervals on both gold rails (16 engravings total). Bright-cut finish.</text>
+    <text x="10" y="90" fill="#ccc" font-size="9">5. ENAMEL: Apply black vitreous enamel into channels. Fire at 800°C (or use cold enamel cure 24h). Grind flush. Polish rails to high mirror.</text>
+    <text x="10" y="104" fill="#ccc" font-size="9">6. FINISH: Rhodium-plate optional (avoid on enamel). Buff outer rails to high-polish. Final QC: check enamel adhesion, ring size, weight.</text>
+    <text x="10" y="116" fill="#aaa" font-size="8" font-style="italic">   Tolerances: ±0.05 mm on all dimensions | Surface finish: Ra ≤ 0.2 µm on gold rails</text>
+  </g>
+
+  <!-- Section cut line on side elevation -->
+  <line x1="540" y1="200" x2="540" y2="320" stroke="#cc0000" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <text x="535" y="195" fill="#cc0000" font-size="10" text-anchor="end">A</text>
+  <line x1="800" y1="200" x2="800" y2="320" stroke="#cc0000" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <text x="806" y="195" fill="#cc0000" font-size="10">A</text>
+
+  <!-- Legend -->
+  <g transform="translate(20,680)">
+    <rect x="0" y="0" width="320" height="60" fill="#eee" rx="3" stroke="#ccc" stroke-width="1"/>
+    <rect x="10" y="10" width="20" height="12" fill="#d4af37" stroke="#8B6914" stroke-width="1"/>
+    <text x="36" y="21" fill="#333" font-size="9">18K Yellow Gold</text>
+    <rect x="10" y="28" width="20" height="12" fill="#22223b" stroke="#555" stroke-width="1"/>
+    <text x="36" y="39" fill="#333" font-size="9">Black Vitreous Enamel</text>
+    <line x1="130" y1="10" x2="150" y2="10" stroke="#cc0000" stroke-width="1.5"/>
+    <text x="156" y="14" fill="#333" font-size="9">Major dimension</text>
+    <line x1="130" y1="28" x2="150" y2="28" stroke="#9900aa" stroke-width="1.5"/>
+    <text x="156" y="32" fill="#333" font-size="9">Enamel dimension</text>
+    <line x1="130" y1="46" x2="150" y2="46" stroke="#0055cc" stroke-width="1.5"/>
+    <text x="156" y="50" fill="#333" font-size="9">Gold rail dimension</text>
+  </g>
+
+  <!-- Drawing info box bottom right -->
+  <rect x="870" y="855" width="310" height="30" fill="#d4af37" rx="3"/>
+  <text x="1025" y="875" text-anchor="middle" fill="#1a1a2e" font-size="9">DRG: RING-001 | REV: A | DATE: 2026-06-13 | SCALE: NTS | UNITS: mm</text>
+
+</svg>
