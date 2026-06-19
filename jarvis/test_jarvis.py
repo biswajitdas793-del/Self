@@ -37,6 +37,27 @@ def test_double_clap_fires():
     print("PASS: double clap fires once on the second clap")
 
 
+def test_refractory_blocks_feedback_loop():
+    """After firing, loud audio (the greeting) must not re-trigger the flow."""
+    d = jarvis.ClapDetector()
+    t = 0.0
+    for _ in range(20):
+        d.feed(0.005, t)
+        t += 0.02
+    # Double clap fires.
+    assert d.feed(1.0, t) is False
+    t += 0.30
+    assert d.feed(1.0, t) is True
+    # Now simulate the greeting blaring through the speakers for a few seconds.
+    refires = 0
+    for _ in range(int(jarvis.REFRACTORY_S / 0.02)):
+        t += 0.02
+        if d.feed(1.0, t):   # loud "self" audio
+            refires += 1
+    assert refires == 0, f"feedback loop: flow re-fired {refires}× during greeting"
+    print("PASS: refractory window blocks the greeting feedback loop")
+
+
 def test_single_clap_does_not_fire():
     d = jarvis.ClapDetector()
     t = 0.0
@@ -88,6 +109,7 @@ def test_welcome_flow_runs_all_actions(monkeypatch_env=None):
 if __name__ == "__main__":
     tests = [
         test_double_clap_fires,
+        test_refractory_blocks_feedback_loop,
         test_single_clap_does_not_fire,
         test_claps_too_far_apart_dont_fire,
         test_rms_of_block,

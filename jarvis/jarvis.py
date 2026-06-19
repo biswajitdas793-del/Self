@@ -23,6 +23,7 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
 import time
 import webbrowser
 from collections import deque
@@ -49,6 +50,9 @@ SPIKE_RATIO = 4.0             # clap must be this many× the rolling baseline
 COOLDOWN_S = 0.20             # ignore new claps for this long after one fires
 DOUBLE_CLAP_WINDOW_S = 0.6    # two claps within this window = a double clap
 BASELINE_BLOCKS = 50          # how many recent blocks form the ambient baseline
+REFRACTORY_S = 6.0            # after firing, ignore all audio this long so the
+                              # spoken greeting can't re-trigger the flow (the
+                              # mic hearing its own voice = a feedback loop)
 
 
 def _block_size() -> int:
@@ -174,10 +178,16 @@ class ClapDetector:
         self.ambient = MIN_RMS        # current ambient baseline
         self.threshold = MIN_RMS      # loudness a clap must currently clear
         self.last_was_clap = False    # did this block register as a clap?
+        self.suppress_until = 0.0     # ignore audio until this time (refractory)
 
     def feed(self, rms: float, now: float) -> bool:
         """Process one block. Returns True if this block completes a double clap."""
         self.last_was_clap = False
+        # During the refractory window (just after firing) ignore everything,
+        # including the greeting playing through the speakers, so it can't
+        # re-trigger us. Don't feed these loud blocks into the baseline either.
+        if now < self.suppress_until:
+            return False
         # Build an ambient baseline from recent quiet-ish blocks.
         ambient = float(np.median(self.baseline)) if self.baseline else MIN_RMS
         self.ambient = ambient
@@ -196,6 +206,7 @@ class ClapDetector:
         # A clap registered. Is it the second one within the window?
         if self.pending_clap_at and (now - self.pending_clap_at) <= DOUBLE_CLAP_WINDOW_S:
             self.pending_clap_at = 0.0
+            self.suppress_until = now + REFRACTORY_S
             return True
         self.pending_clap_at = now
         return False
@@ -246,7 +257,9 @@ def listen() -> None:
                 meter["blocks"] = 0
 
         if fired:
-            run_welcome_flow()
+            # Run off the audio thread: speak()/launch can block for seconds,
+            # and blocking here would stall mic capture.
+            threading.Thread(target=run_welcome_flow, daemon=True).start()
 
     try:
         with sd.InputStream(
