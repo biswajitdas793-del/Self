@@ -20,6 +20,31 @@ cp .env.example .env        # then edit .env to taste
 python jarvis.py            # clap twice; Ctrl-C to quit
 ```
 
+## Go live on macOS (auto-start)
+
+To make Jarvis run automatically and stay running across logins, use the
+installer. It creates the venv, installs deps, verifies the build, and installs
+a [LaunchAgent](https://www.launchd.info/):
+
+```bash
+cd jarvis
+./install-macos.sh
+```
+
+It pauses once to let you grant **microphone permission** — important, because a
+background LaunchAgent can't show macOS's permission prompt, so you grant it by
+running Jarvis manually in Terminal once when prompted.
+
+```bash
+tail -f jarvis.log                                   # watch it
+launchctl unload ~/Library/LaunchAgents/com.jarvis.doubleclap.plist   # stop
+```
+
+To uninstall: `launchctl unload ~/Library/LaunchAgents/com.jarvis.doubleclap.plist && rm ~/Library/LaunchAgents/com.jarvis.doubleclap.plist`
+
+> On macOS the `sounddevice` wheel bundles PortAudio, so no extra install is
+> needed. If import ever fails, run `brew install portaudio`.
+
 ### Linux audio / TTS
 - Microphone capture uses PortAudio. If `sounddevice` fails to import, install
   it: `sudo apt install libportaudio2`.
