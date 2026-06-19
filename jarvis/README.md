@@ -93,3 +93,25 @@ The constants at the top of `jarvis.py` control clap sensitivity:
 
 Getting false triggers? Raise `MIN_RMS` / `SPIKE_RATIO`. Missing claps? Lower
 them.
+
+## Troubleshooting: it doesn't hear my claps
+
+Run with the debug level meter to see exactly what the mic picks up:
+
+```bash
+JARVIS_DEBUG=1 python jarvis.py
+```
+
+You'll get a live readout per block, e.g. `level 0.180 (need >0.040) |#######`.
+
+- **Bar stays at `0.000` while you clap** → the mic isn't reaching the process.
+  On macOS grant access in **System Settings → Privacy & Security →
+  Microphone** for your terminal app, then restart. Also check the right input
+  device is selected in **System Settings → Sound → Input**.
+- **Bar moves but never says `👏 clap`** → your claps don't clear the threshold.
+  Lower `MIN_RMS` (e.g. to `0.02`) and/or `SPIKE_RATIO` in `jarvis.py`.
+- **Single claps register but the flow never runs** → the two claps are too far
+  apart; clap a bit faster or raise `DOUBLE_CLAP_WINDOW_S`.
+
+Remember: the listener must actually be running (`python jarvis.py`) for claps
+to do anything — the installer's build step only runs a synthetic self-test.

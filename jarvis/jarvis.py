@@ -170,11 +170,18 @@ class ClapDetector:
         self.baseline: deque[float] = deque(maxlen=BASELINE_BLOCKS)
         self.last_fire_at = 0.0       # when the cooldown last started
         self.pending_clap_at = 0.0    # first clap of a potential double
+        # Diagnostics, refreshed every feed() — handy for the debug meter.
+        self.ambient = MIN_RMS        # current ambient baseline
+        self.threshold = MIN_RMS      # loudness a clap must currently clear
+        self.last_was_clap = False    # did this block register as a clap?
 
     def feed(self, rms: float, now: float) -> bool:
         """Process one block. Returns True if this block completes a double clap."""
+        self.last_was_clap = False
         # Build an ambient baseline from recent quiet-ish blocks.
         ambient = float(np.median(self.baseline)) if self.baseline else MIN_RMS
+        self.ambient = ambient
+        self.threshold = max(MIN_RMS, ambient * SPIKE_RATIO)
         is_spike = rms >= MIN_RMS and rms >= ambient * SPIKE_RATIO
 
         # Only feed non-spike blocks into the baseline so claps don't inflate it.
@@ -185,6 +192,7 @@ class ClapDetector:
             return False
 
         self.last_fire_at = now
+        self.last_was_clap = True
         # A clap registered. Is it the second one within the window?
         if self.pending_clap_at and (now - self.pending_clap_at) <= DOUBLE_CLAP_WINDOW_S:
             self.pending_clap_at = 0.0
@@ -202,16 +210,42 @@ def listen() -> None:
     """Stream the mic, detect double claps, and fire the welcome flow."""
     block = _block_size()
     detector = ClapDetector()
+    debug = os.getenv("JARVIS_DEBUG", "").strip().lower() in {"1", "true", "yes", "on"}
 
     print(
         "[jarvis] listening for double claps "
         f"(rate={SAMPLE_RATE}Hz, block={BLOCK_MS}ms). Ctrl-C to quit."
     )
+    if debug:
+        print("[jarvis] DEBUG on — showing a live level meter. Clap and watch.")
+
+    meter = {"peak": 0.0, "blocks": 0}
 
     def callback(indata, frames, time_info, status):  # noqa: ANN001
         if status:
             print(f"[jarvis] audio status: {status}", file=sys.stderr)
-        if detector.feed(_rms(indata), time.monotonic()):
+        rms = _rms(indata)
+        fired = detector.feed(rms, time.monotonic())
+
+        if debug:
+            meter["peak"] = max(meter["peak"], rms)
+            meter["blocks"] += 1
+            if detector.last_was_clap:
+                print(
+                    f"[jarvis][debug] 👏 clap  rms={rms:.3f}  "
+                    f"threshold={detector.threshold:.3f}"
+                )
+            # Print a level bar a few times a second so silence is visible too.
+            if meter["blocks"] >= 15:
+                bar = "#" * int(min(meter["peak"], 1.0) * 40)
+                print(
+                    f"[jarvis][debug] level {meter['peak']:.3f} "
+                    f"(need >{detector.threshold:.3f}) |{bar}"
+                )
+                meter["peak"] = 0.0
+                meter["blocks"] = 0
+
+        if fired:
             run_welcome_flow()
 
     try:
