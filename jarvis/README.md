@@ -26,6 +26,18 @@ python jarvis.py            # clap twice; Ctrl-C to quit
 - Offline speech uses `spd-say` (speech-dispatcher) or `espeak`/`espeak-ng`.
   Install one, e.g. `sudo apt install espeak-ng`. `pyttsx3` is the fallback.
 
+## Verify it works (no mic needed)
+
+The clap-detection algorithm is isolated in `ClapDetector`, so you can test it
+with synthetic audio:
+
+```bash
+python test_jarvis.py
+```
+
+This drives single/double/too-slow clap sequences through the detector and
+checks the welcome flow speaks, opens every URL, and launches every app.
+
 ## Configure (`.env`)
 
 | Variable | What it does |

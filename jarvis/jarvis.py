@@ -157,13 +157,51 @@ def run_welcome_flow() -> None:
 
 
 # --- Clap detection ----------------------------------------------------------
+class ClapDetector:
+    """Turns a stream of audio-block loudness values into double-clap events.
+
+    Pure logic, no audio I/O — feed it RMS values with timestamps via
+    :meth:`feed` and it returns ``True`` exactly on the block that completes a
+    double clap. Kept separate from the microphone stream so it can be tuned
+    and tested with synthetic input.
+    """
+
+    def __init__(self) -> None:
+        self.baseline: deque[float] = deque(maxlen=BASELINE_BLOCKS)
+        self.last_fire_at = 0.0       # when the cooldown last started
+        self.pending_clap_at = 0.0    # first clap of a potential double
+
+    def feed(self, rms: float, now: float) -> bool:
+        """Process one block. Returns True if this block completes a double clap."""
+        # Build an ambient baseline from recent quiet-ish blocks.
+        ambient = float(np.median(self.baseline)) if self.baseline else MIN_RMS
+        is_spike = rms >= MIN_RMS and rms >= ambient * SPIKE_RATIO
+
+        # Only feed non-spike blocks into the baseline so claps don't inflate it.
+        if not is_spike:
+            self.baseline.append(rms)
+
+        if not is_spike or (now - self.last_fire_at) < COOLDOWN_S:
+            return False
+
+        self.last_fire_at = now
+        # A clap registered. Is it the second one within the window?
+        if self.pending_clap_at and (now - self.pending_clap_at) <= DOUBLE_CLAP_WINDOW_S:
+            self.pending_clap_at = 0.0
+            return True
+        self.pending_clap_at = now
+        return False
+
+
+def _rms(block: np.ndarray) -> float:
+    """Root-mean-square loudness of a mono audio block."""
+    return float(np.sqrt(np.mean(np.square(block[:, 0]))))
+
+
 def listen() -> None:
     """Stream the mic, detect double claps, and fire the welcome flow."""
     block = _block_size()
-    baseline = deque(maxlen=BASELINE_BLOCKS)
-    last_clap_at = 0.0          # time of the most recent single clap
-    last_fire_at = 0.0          # time the cooldown started
-    pending_clap_at = 0.0       # first clap of a potential double
+    detector = ClapDetector()
 
     print(
         "[jarvis] listening for double claps "
@@ -171,32 +209,10 @@ def listen() -> None:
     )
 
     def callback(indata, frames, time_info, status):  # noqa: ANN001
-        nonlocal last_clap_at, last_fire_at, pending_clap_at
         if status:
             print(f"[jarvis] audio status: {status}", file=sys.stderr)
-
-        rms = float(np.sqrt(np.mean(np.square(indata[:, 0]))))
-        now = time.monotonic()
-
-        # Build an ambient baseline from recent quiet-ish blocks.
-        ambient = np.median(baseline) if baseline else MIN_RMS
-        is_spike = rms >= MIN_RMS and rms >= ambient * SPIKE_RATIO
-
-        # Only feed non-spike blocks into the baseline so claps don't inflate it.
-        if not is_spike:
-            baseline.append(rms)
-
-        if not is_spike or (now - last_fire_at) < COOLDOWN_S:
-            return
-
-        last_fire_at = now
-        # A clap registered. Is it the second one within the window?
-        if pending_clap_at and (now - pending_clap_at) <= DOUBLE_CLAP_WINDOW_S:
-            pending_clap_at = 0.0
+        if detector.feed(_rms(indata), time.monotonic()):
             run_welcome_flow()
-        else:
-            pending_clap_at = now
-        last_clap_at = now
 
     try:
         with sd.InputStream(
