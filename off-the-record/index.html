@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>OFF THE RECORD — The Vault</title>
+<meta name="description" content="Off the Record — discover what this year's retreats won't tell you in the brochure. An AI + AR concept experience that reveals the stories, transformations and conversations behind five extraordinary journeys." />
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#0a0a0c" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0c'/%3E%3Crect x='10' y='26' width='44' height='12' fill='%23c9a227'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#0a0a0c; --panel:#121216; --ink:#ece7dc; --muted:#8c8678;
+    --gold:#c9a227; --gold-soft:#e3c869; --red:#b3261e; --line:rgba(201,162,39,.22);
+    --paper:#e8e2d2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  /* film grain + scanlines */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:9;
+    background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);
+    mix-blend-mode:overlay; opacity:.5;
+  }
+  body::after{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:9;
+    background:radial-gradient(ellipse at 50% 0%,transparent 40%,rgba(0,0,0,.55) 100%);
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:0 22px}
+  h1,h2,h3{font-family:"Special Elite",serif;font-weight:400;letter-spacing:.5px;margin:0}
+  a{color:var(--gold-soft)}
+  button{font-family:inherit;cursor:pointer}
+
+  /* ===== Stamp / classified header ===== */
+  header.bar{
+    position:sticky;top:0;z-index:8;
+    background:linear-gradient(180deg,rgba(10,10,12,.96),rgba(10,10,12,.6));
+    border-bottom:1px solid var(--line);backdrop-filter:blur(6px);
+  }
+  .bar .wrap{display:flex;align-items:center;justify-content:space-between;height:58px}
+  .brand{display:flex;align-items:center;gap:12px;font-family:"Special Elite";font-size:18px;letter-spacing:3px}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 14px var(--red);animation:rec 1.6s infinite}
+  @keyframes rec{0%,100%{opacity:1}50%{opacity:.25}}
+  .filemeta{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+
+  /* ===== Stage scenes ===== */
+  .scene{display:none;animation:fade .6s ease both}
+  .scene.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* ===== Vault / hero ===== */
+  .vault{min-height:calc(100vh - 58px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 22px;position:relative}
+  .classified-tag{
+    border:2px solid var(--red);color:var(--red);font-family:"Special Elite";
+    letter-spacing:4px;font-size:13px;padding:6px 16px;transform:rotate(-3deg);
+    display:inline-block;margin-bottom:26px;text-transform:uppercase;
+  }
+  .vault h1{font-size:clamp(46px,12vw,116px);line-height:.92;letter-spacing:2px;color:var(--paper)}
+  .vault h1 .of{color:var(--gold)}
+  .tagline{max-width:560px;margin:26px auto 0;color:var(--ink);font-size:clamp(15px,2.4vw,18px)}
+  .tagline .red{background:var(--ink);color:var(--bg);padding:0 6px}
+  .cta{
+    margin-top:40px;background:var(--gold);color:#1a1406;border:none;
+    padding:16px 30px;font-size:14px;letter-spacing:3px;text-transform:uppercase;font-weight:600;
+    box-shadow:0 0 0 0 rgba(201,162,39,.5);transition:.25s;
+  }
+  .cta:hover{box-shadow:0 12px 40px -10px var(--gold);transform:translateY(-2px)}
+  .ghost{background:transparent;color:var(--muted);border:1px solid var(--line);padding:13px 22px;letter-spacing:2px;text-transform:uppercase;font-size:12px;transition:.2s}
+  .ghost:hover{color:var(--ink);border-color:var(--gold)}
+  .micrographic{position:absolute;inset:0;pointer-events:none;opacity:.06;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ctext x='0' y='20' font-family='monospace' font-size='9' fill='%23c9a227'%3ECONFIDENTIAL%3C/text%3E%3C/svg%3E");
+    transform:rotate(-20deg) scale(1.4)}
+
+  /* ===== AI host ===== */
+  .host{max-width:760px;margin:0 auto;padding:54px 0 90px}
+  .host-card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:26px;position:relative;box-shadow:0 30px 80px -40px #000}
+  .host-card::before{content:"● AI HOST — SECURE CHANNEL";position:absolute;top:-10px;left:18px;background:var(--bg);padding:0 8px;font-size:10px;letter-spacing:2px;color:var(--red)}
+  .say{font-family:"Special Elite";font-size:clamp(19px,3.5vw,26px);color:var(--paper);min-height:1.4em;margin:8px 0 4px}
+  .caret{display:inline-block;width:9px;background:var(--gold);margin-left:2px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .qblock{margin-top:30px;opacity:0;transition:opacity .4s}
+  .qblock.show{opacity:1}
+  .qlabel{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .qlabel b{color:var(--gold)}
+  .opts{display:flex;flex-wrap:wrap;gap:10px}
+  .opt{
+    background:transparent;border:1px solid var(--line);color:var(--ink);
+    padding:11px 16px;font-size:13px;border-radius:3px;transition:.18s;letter-spacing:.5px;
+  }
+  .opt:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .opt.sel{background:var(--gold);color:#1a1406;border-color:var(--gold);font-weight:600}
+  .leak-input{width:100%;margin-top:8px;background:#0c0c0f;border:1px solid var(--line);color:var(--ink);
+    font-family:inherit;font-size:14px;padding:13px;border-radius:3px;resize:vertical;min-height:64px}
+  .leak-input:focus{outline:none;border-color:var(--gold)}
+  .step-actions{margin-top:26px;display:flex;gap:12px;align-items:center}
+  .progress{margin-left:auto;font-size:11px;color:var(--muted);letter-spacing:2px}
+
+  /* ===== AR file vault ===== */
+  .reveal-head{text-align:center;padding:46px 0 8px}
+  .reveal-head h2{font-size:clamp(26px,5vw,40px);color:var(--paper)}
+  .reveal-head p{color:var(--muted);max-width:560px;margin:12px auto 0;font-size:14px}
+  .ar-stage{perspective:1400px;padding:30px 0 60px}
+  .files{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px;transform-style:preserve-3d}
+  .file{
+    background:linear-gradient(160deg,#16140d,#0e0d0b);border:1px solid var(--line);
+    border-radius:6px;padding:22px;position:relative;cursor:pointer;
+    transition:transform .3s cubic-bezier(.2,.7,.3,1),box-shadow .3s,border-color .3s;
+    transform-style:preserve-3d;will-change:transform;overflow:hidden;
+  }
+  .file::after{content:"";position:absolute;inset:0;background:
+    repeating-linear-gradient(90deg,transparent 0 26px,rgba(201,162,39,.05) 26px 27px);pointer-events:none}
+  .file:hover{transform:translateZ(40px) rotateX(4deg);box-shadow:0 30px 70px -30px #000,0 0 0 1px var(--gold);border-color:var(--gold)}
+  .file .no{font-size:12px;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+  .file .codename{font-family:"Special Elite";font-size:22px;color:var(--paper);margin:8px 0 4px}
+  .file .place{font-size:12px;color:var(--muted);letter-spacing:1px}
+  .file .redacted{margin-top:16px;display:flex;flex-direction:column;gap:7px}
+  .file .redacted span{height:9px;background:#000;border-radius:2px;opacity:.8}
+  .file .redacted span:nth-child(1){width:90%}
+  .file .redacted span:nth-child(2){width:70%}
+  .file .redacted span:nth-child(3){width:82%}
+  .file .tap{position:absolute;bottom:14px;right:16px;font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;opacity:.7}
+  .file.match{box-shadow:0 0 0 1px var(--gold-soft),0 0 30px -6px var(--gold)}
+  .file .matchflag{position:absolute;top:0;right:0;background:var(--gold);color:#1a1406;font-size:9px;letter-spacing:2px;padding:4px 9px;font-weight:700}
+
+  /* ===== File modal ===== */
+  .modal{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(4,4,6,.86);backdrop-filter:blur(4px)}
+  .modal.open{display:flex;animation:fade .3s both}
+  .dossier{
+    background:var(--paper);color:#1c1812;max-width:640px;width:100%;max-height:90vh;overflow:auto;
+    border-radius:4px;padding:34px;position:relative;box-shadow:0 40px 120px -30px #000;
+    font-family:"IBM Plex Mono",monospace;
+  }
+  .dossier .stamp{position:absolute;top:18px;right:22px;border:3px solid var(--red);color:var(--red);
+    font-family:"Special Elite";letter-spacing:3px;font-size:13px;padding:5px 12px;transform:rotate(8deg);opacity:.85}
+  .dossier h3{font-size:13px;letter-spacing:3px;color:#8a3a14;text-transform:uppercase}
+  .dossier .ttl{font-family:"Special Elite";font-size:30px;margin:6px 0 2px;color:#1c1812}
+  .dossier .sub{font-size:12px;color:#6b6354;letter-spacing:1px;border-bottom:1px dashed #b6ad96;padding-bottom:16px;margin-bottom:16px}
+  .moments{list-style:none;padding:0;margin:0 0 20px}
+  .moments li{padding:11px 0 11px 26px;position:relative;border-bottom:1px solid #d8d0bd;font-size:14px}
+  .moments li::before{content:"▸";position:absolute;left:4px;color:var(--gold);}
+  .conv{background:#1c1812;color:var(--paper);padding:16px 18px;border-radius:3px;font-family:"Special Elite";font-size:17px;margin:6px 0 20px}
+  .conv small{display:block;font-family:"IBM Plex Mono";font-size:10px;letter-spacing:2px;color:var(--gold-soft);margin-bottom:6px}
+  .closex{position:absolute;top:14px;left:16px;background:none;border:none;font-size:22px;color:#1c1812}
+  .pillrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .pill{font-size:10px;letter-spacing:1px;background:#1c1812;color:var(--paper);padding:4px 10px;border-radius:20px;text-transform:uppercase}
+
+  /* ===== Conversations strip ===== */
+  .convos{padding:24px 0 70px}
+  .convos h2{text-align:center;font-size:clamp(22px,4vw,32px);color:var(--paper);margin-bottom:8px}
+  .convos .hint{text-align:center;color:var(--muted);font-size:13px;margin-bottom:26px}
+  .bubbles{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+  .bubble{background:var(--panel);border:1px solid var(--line);border-radius:30px;padding:13px 20px;
+    font-family:"Special Elite";font-size:15px;color:var(--ink);cursor:pointer;transition:.2s;max-width:340px}
+  .bubble:hover{border-color:var(--gold);color:var(--gold-soft);transform:translateY(-2px)}
+  .bubble small{display:block;font-family:"IBM Plex Mono";font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:3px}
+
+  /* ===== Final dossier scene ===== */
+  .final{padding:50px 0 100px}
+  .final .passport{background:var(--paper);color:#1c1812;border-radius:6px;padding:38px;max-width:760px;margin:0 auto;position:relative;box-shadow:0 40px 120px -40px #000}
+  .final .passport .stamp{position:absolute;top:24px;right:26px;border:3px solid var(--red);color:var(--red);font-family:"Special Elite";letter-spacing:3px;font-size:13px;padding:5px 12px;transform:rotate(6deg);opacity:.85}
+  .final h2{font-size:13px;letter-spacing:4px;color:#8a3a14;text-transform:uppercase}
+  .final .dttl{font-family:"Special Elite";font-size:clamp(26px,5vw,38px);margin:6px 0 4px;color:#1c1812}
+  .final .meta{font-size:12px;color:#6b6354;letter-spacing:1px;border-bottom:1px dashed #b6ad96;padding-bottom:18px;margin-bottom:8px}
+  .rec{border-bottom:1px solid #d8d0bd;padding:20px 0}
+  .rec .rno{font-size:11px;letter-spacing:3px;color:#8a3a14;text-transform:uppercase}
+  .rec .rname{font-family:"Special Elite";font-size:23px;color:#1c1812;margin:3px 0}
+  .rec .rwhy{font-size:14px;color:#3a3328;margin-top:6px}
+  .rec .rwhy b{color:#1c1812}
+  .seal{display:flex;align-items:center;gap:16px;margin-top:24px;flex-wrap:wrap}
+  .qr{width:104px;height:104px;flex:none;background:#1c1812;border-radius:6px;padding:9px}
+  .qr svg{width:100%;height:100%;display:block}
+  .seal .scan{font-size:12px;color:#6b6354}
+  .seal .scan b{color:#1c1812;font-family:"Special Elite";font-size:16px;display:block}
+  .final-actions{display:flex;gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap}
+  @media print{
+    body::before,body::after,header.bar,.final-actions{display:none!important}
+    body{background:#fff}
+    .final .passport{box-shadow:none}
+  }
+  .footnote{text-align:center;color:var(--muted);font-size:11px;letter-spacing:1px;padding:30px 0 50px}
+  .footnote a{color:var(--muted);text-decoration:underline}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>OFF&nbsp;THE&nbsp;RECORD</div>
+    <div class="filemeta" id="clock">SECURE&nbsp;·&nbsp;CLEARANCE&nbsp;PENDING</div>
+  </div>
+</header>
+
+<!-- ============ SCENE 1 — THE VAULT ============ -->
+<section class="scene active" id="scene-vault">
+  <div class="vault">
+    <div class="micrographic"></div>
+    <span class="classified-tag">Classified · Eyes Only</span>
+    <h1><span class="of">OFF</span> THE<br>RECORD</h1>
+    <p class="tagline">Discover what this year's retreats <span class="red">won't tell you</span> in the brochure.</p>
+    <button class="cta" id="enter">Request Access →</button>
+    <div style="margin-top:22px"><button class="ghost" id="skip-to-files">Browse the vault</button></div>
+  </div>
+</section>
+
+<!-- ============ SCENE 2 — AI HOST / RECOMMENDATION ENGINE ============ -->
+<section class="scene" id="scene-host">
+  <div class="wrap host">
+    <div class="host-card">
+      <div class="say" id="hostSay"></div>
+      <div class="qblock" id="qblock"></div>
+      <div class="step-actions" id="stepActions" style="display:none">
+        <button class="cta" id="nextStep" style="margin-top:0;padding:13px 24px">Continue →</button>
+        <button class="ghost" id="backStep" style="display:none">← Back</button>
+        <span class="progress" id="progress"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCENE 3 — AR FILE VAULT ============ -->
+<section class="scene" id="scene-files">
+  <div class="wrap">
+    <div class="reveal-head">
+      <h2 id="filesHead">The Confidential Files</h2>
+      <p id="filesSub">What happens at these retreats is usually off the record. Tap a file to open it — and see the moments that never make the brochure. Move your cursor (or tilt your phone) to feel the vault.</p>
+    </div>
+    <div class="ar-stage"><div class="files" id="filesGrid"></div></div>
+  </div>
+
+  <div class="wrap convos">
+    <h2>Unlocked Conversations</h2>
+    <p class="hint">Every retreat is really a conversation. Tap one to reveal the journey behind it.</p>
+    <div class="bubbles" id="bubbles"></div>
+  </div>
+
+  <div class="wrap" style="text-align:center;padding-bottom:70px">
+    <button class="cta" id="toDossier">Generate my Off-the-Record Dossier →</button>
+  </div>
+</section>
+
+<!-- ============ SCENE 4 — DOSSIER / PASSPORT ============ -->
+<section class="scene" id="scene-dossier">
+  <div class="wrap final">
+    <div class="passport" id="passport"></div>
+    <div class="final-actions">
+      <button class="cta" id="printDossier" style="margin-top:0">Save / Print Dossier</button>
+      <button class="ghost" id="restart">Start over</button>
+    </div>
+    <p class="footnote">A concept experience for YPO retreats · Patiala · Somnath&nbsp;/&nbsp;Gir · Haridwar · Hampi · Andamans<br>
+      Off the record means off the record. Nothing here leaves the room.</p>
+  </div>
+</section>
+
+<!-- ============ FILE MODAL ============ -->
+<div class="modal" id="modal">
+  <div class="dossier" id="modalBody"></div>
+</div>
+
+<script>
+/* =================== DATA =================== */
+const TAGS = ["adventure","family","wellness","meaning","leadership","stuck","burnout","belonging"];
+
+const RETREATS = [
+  {
+    id:"patiala", no:"FILE 09", code:"The Royal Table", place:"Patiala · Punjab",
+    flag:"Heritage", weights:{belonging:3,leadership:2,family:1,meaning:1},
+    moments:[
+      "A private durbar dinner inside a wing of the palace that's closed to the public.",
+      "Turban-tying with a royal household — and the stories that come with it.",
+      "Late-night ghazals in a courtyard, where rank quietly dissolves.",
+      "A langar served shoulder-to-shoulder, billionaire beside stranger."
+    ],
+    conv:{line:"The toast that turned three competitors into co-founders.", tag:"OVERHEARD · 11:40 PM"},
+    why:"Off the record, Patiala consistently does one thing better than anywhere else: it makes powerful strangers feel like old family by the second night."
+  },
+  {
+    id:"somnath", no:"FILE 16", code:"Tides & Lions", place:"Somnath / Gir · Gujarat",
+    flag:"Perspective", weights:{meaning:3,adventure:2,leadership:1,wellness:1},
+    moments:[
+      "Dawn aarti at the edge of the sea, where the temple and the tide meet.",
+      "Tracking the last wild Asiatic lions at first light — engines off, breath held.",
+      "An hour of enforced silence on an empty shore. No phone. No title.",
+      "A fireside with a conservationist who answers to no quarterly report."
+    ],
+    conv:{line:"The question a lion's stare asked that the boardroom never did.", tag:"FIELD NOTE · 06:12 AM"},
+    why:"Off the record, members say Gir resets their sense of scale — you return making decisions from a longer horizon than the next earnings call."
+  },
+  {
+    id:"haridwar", no:"FILE 22", code:"Wellness Reset", place:"Haridwar · Uttarakhand",
+    flag:"Wellness", weights:{wellness:3,burnout:3,meaning:2,stuck:1},
+    moments:[
+      "Ganga Aarti with a thousand floating lamps — and a lump in the throat you didn't expect.",
+      "A 4 a.m. breathing practice on an empty ghat as the river wakes.",
+      "Releasing something you've carried too long into the current, on purpose.",
+      "A one-to-one with a teacher who has never heard of your company — and doesn't need to."
+    ],
+    conv:{line:"The confession at the river that lifted a ten-year weight.", tag:"PRIVATE · 05:50 AM"},
+    why:"Off the record, this is the one members book when they won't say the word 'burnout' out loud. It's where the armour finally comes off."
+  },
+  {
+    id:"hampi", no:"FILE 07", code:"Adventure", place:"Hampi · Karnataka",
+    flag:"Adventure", weights:{adventure:3,stuck:3,leadership:2,meaning:1},
+    moments:[
+      "Sunrise over the boulder fields — a 14th-century empire glowing gold beneath you.",
+      "A coracle drift down the Tungabhadra with nowhere to be.",
+      "A climb that quietly rewires what you think 'risk' means.",
+      "Dinner among temple ruins, with someone who's lived here their whole life."
+    ],
+    conv:{line:"The idea that arrived at the top of a thousand-year-old rock.", tag:"LOGGED · 06:40 AM"},
+    why:"Off the record, Hampi is where 'stuck' founders unstick. Something about ancient scale makes this year's problem look smaller."
+  },
+  {
+    id:"andamans", no:"FILE 14", code:"Family Connection", place:"Andaman Islands",
+    flag:"Family", weights:{family:3,adventure:2,burnout:1,belonging:1},
+    moments:[
+      "A first dive — taken together, equally out of your depth.",
+      "A bioluminescent night paddle where the water itself lights up.",
+      "Seventy-two hours with no signal, and the conversations that finally happen because of it.",
+      "Kids and CEOs side by side, both beginners, both delighted."
+    ],
+    conv:{line:"The apology underwater that no email could ever carry.", tag:"UNRECORDED · 60 FT"},
+    why:"Off the record, the Andamans create the most meaningful family memories on the calendar — because there's nowhere to hide and nothing to scroll."
+  }
+];
+
+/* =================== ENGINE: questions =================== */
+const QUESTIONS = [
+  { key:"hope", label:"What are you hoping to experience this year?",
+    opts:[
+      {t:"Adventure", tags:["adventure"]},
+      {t:"Deeper family connection", tags:["family"]},
+      {t:"A wellness reset", tags:["wellness"]},
+      {t:"Meaning & perspective", tags:["meaning"]},
+      {t:"Leadership under pressure", tags:["leadership"]}
+    ]},
+  { key:"time", label:"What do you wish you had more time for?",
+    opts:[
+      {t:"Stillness", tags:["wellness","meaning"]},
+      {t:"My family", tags:["family","belonging"]},
+      {t:"Bold, physical experiences", tags:["adventure"]},
+      {t:"Real friendships", tags:["belonging"]},
+      {t:"Thinking time", tags:["stuck","leadership"]}
+    ]},
+  { key:"leak", label:"Tell me something you're <b>not</b> putting on your LinkedIn profile this year.",
+    leak:true,
+    opts:[
+      {t:"Burnout", tags:["burnout","wellness"]},
+      {t:"Family priorities", tags:["family"]},
+      {t:"Desire for adventure", tags:["adventure"]},
+      {t:"Feeling stuck", tags:["stuck"]},
+      {t:"Searching for meaning", tags:["meaning"]}
+    ]}
+];
+
+const HOST_SCRIPT = [
+  "What happens at these retreats is often off the record.",
+  "But — between us — I can show you glimpses.",
+  "First, tell me the truth. No one's recording."
+];
+
+/* =================== STATE =================== */
+const state = { step:0, answers:{}, leakText:"" };
+
+/* =================== HELPERS =================== */
+const $ = s => document.querySelector(s);
+const scenes = { vault:$("#scene-vault"), host:$("#scene-host"), files:$("#scene-files"), dossier:$("#scene-dossier") };
+function show(name){
+  Object.values(scenes).forEach(s=>s.classList.remove("active"));
+  scenes[name].classList.add("active");
+  window.scrollTo({top:0,behavior:"instant"});
+}
+
+/* typewriter */
+function type(el, text, done){
+  el.innerHTML=""; let i=0;
+  const caret=document.createElement("span"); caret.className="caret"; caret.innerHTML="&nbsp;";
+  el.appendChild(caret);
+  const tick=()=>{
+    if(i<=text.length){
+      el.innerHTML=text.slice(0,i)+'<span class="caret">&nbsp;</span>';
+      i++; setTimeout(tick, text[i-1]===" "?18:34);
+    } else { el.innerHTML=text; if(done) done(); }
+  };
+  tick();
+}
+
+/* =================== HOST FLOW =================== */
+$("#enter").onclick=()=>{ show("host"); runHostIntro(); };
+$("#skip-to-files").onclick=()=>{ buildFiles(); buildBubbles(); show("files"); };
+
+let hostLine=0;
+function runHostIntro(){
+  hostLine=0; $("#qblock").classList.remove("show"); $("#qblock").innerHTML=""; $("#stepActions").style.display="none";
+  const advance=()=>{
+    if(hostLine<HOST_SCRIPT.length){
+      type($("#hostSay"), HOST_SCRIPT[hostLine], ()=>{
+        hostLine++;
+        if(hostLine<HOST_SCRIPT.length) setTimeout(advance,650);
+        else setTimeout(()=>{ state.step=0; renderQuestion(); }, 500);
+      });
+    }
+  };
+  advance();
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[state.step];
+  type($("#hostSay"), q.label.replace(/<[^>]+>/g,""), ()=>{ $("#hostSay").innerHTML = q.label; });
+  const qb=$("#qblock"); qb.innerHTML="";
+  const lab=document.createElement("div"); lab.className="qlabel";
+  lab.innerHTML=`Interrogation ${state.step+1} of ${QUESTIONS.length} · <b>answer honestly</b>`;
+  qb.appendChild(lab);
+
+  const opts=document.createElement("div"); opts.className="opts";
+  q.opts.forEach(o=>{
+    const b=document.createElement("button"); b.className="opt"; b.textContent=o.t;
+    if(state.answers[q.key]===o.t) b.classList.add("sel");
+    b.onclick=()=>{ state.answers[q.key]=o.t; state.answers[q.key+"_tags"]=o.tags;
+      [...opts.children].forEach(c=>c.classList.remove("sel")); b.classList.add("sel"); };
+    opts.appendChild(b);
+  });
+  qb.appendChild(opts);
+
+  if(q.leak){
+    const ta=document.createElement("textarea"); ta.className="leak-input";
+    ta.placeholder="…or type it here. Off the record."; ta.value=state.leakText;
+    ta.oninput=e=>state.leakText=e.target.value;
+    qb.appendChild(ta);
+  }
+  qb.classList.add("show");
+
+  $("#stepActions").style.display="flex";
+  $("#backStep").style.display = state.step>0 ? "inline-block":"none";
+  $("#nextStep").textContent = state.step===QUESTIONS.length-1 ? "Reveal the vault →" : "Continue →";
+  $("#progress").textContent = `STEP ${state.step+1}/${QUESTIONS.length}`;
+}
+
+$("#nextStep").onclick=()=>{
+  const q=QUESTIONS[state.step];
+  if(!state.answers[q.key] && !(q.leak && state.leakText.trim())){
+    // soft nudge: pulse host
+    type($("#hostSay"),"Don't be shy. Pick one — no one's recording.",()=>{ setTimeout(()=>renderQuestion(),900); });
+    return;
+  }
+  if(state.step < QUESTIONS.length-1){ state.step++; renderQuestion(); }
+  else { buildFiles(true); buildBubbles(); show("files"); }
+};
+$("#backStep").onclick=()=>{ if(state.step>0){ state.step--; renderQuestion(); } };
+
+/* =================== SCORING =================== */
+function collectTags(){
+  const t=[];
+  QUESTIONS.forEach(q=>{ const arr=state.answers[q.key+"_tags"]; if(arr) t.push(...arr); });
+  return t;
+}
+function ranked(){
+  const tags=collectTags();
+  return RETREATS.map(r=>{
+    let score=0; tags.forEach(tg=> score += (r.weights[tg]||0));
+    return {...r, score};
+  }).sort((a,b)=> b.score-a.score || RETREATS.indexOf(a)-RETREATS.indexOf(b));
+}
+
+/* =================== FILES (AR) =================== */
+function buildFiles(personalised){
+  const grid=$("#filesGrid"); grid.innerHTML="";
+  const order = personalised ? ranked() : RETREATS.map(r=>({...r,score:0}));
+  const topIds = personalised ? order.slice(0,3).map(r=>r.id) : [];
+
+  if(personalised){
+    $("#filesHead").textContent = "Off the record, here's where I'd send you.";
+    $("#filesSub").innerHTML = "Three files glowed brighter for you — but the whole vault is open. Tap any file to open it.";
+  }
+
+  order.forEach(r=>{
+    const card=document.createElement("div"); card.className="file"; card.dataset.id=r.id;
+    if(topIds.includes(r.id)) card.classList.add("match");
+    card.innerHTML=`
+      ${topIds.includes(r.id)?'<div class="matchflag">RECOMMENDED</div>':''}
+      <div class="no">${r.no}</div>
+      <div class="codename">${r.code}</div>
+      <div class="place">${r.place}</div>
+      <div class="redacted"><span></span><span></span><span></span></div>
+      <div class="tap">Tap to open ▸</div>`;
+    card.onclick=()=>openFile(r.id);
+    grid.appendChild(card);
+  });
+  enableParallax();
+}
+
+function buildBubbles(){
+  const b=$("#bubbles"); b.innerHTML="";
+  RETREATS.forEach(r=>{
+    const el=document.createElement("button"); el.className="bubble";
+    el.innerHTML=`<small>${r.conv.tag}</small>“${r.conv.line}”`;
+    el.onclick=()=>openFile(r.id);
+    b.appendChild(el);
+  });
+}
+
+/* parallax / tilt */
+function enableParallax(){
+  const stage=$("#filesGrid");
+  const apply=(rx,ry)=> stage.style.transform=`rotateX(${ry}deg) rotateY(${rx}deg)`;
+  window.onmousemove=e=>{
+    const cx=(e.clientX/window.innerWidth-.5), cy=(e.clientY/window.innerHeight-.5);
+    apply(cx*8, -cy*6);
+  };
+  if(window.DeviceOrientationEvent){
+    window.addEventListener("deviceorientation",e=>{
+      if(e.gamma==null) return;
+      apply(Math.max(-12,Math.min(12,e.gamma/3)), Math.max(-10,Math.min(10,(e.beta-45)/4)));
+    });
+  }
+}
+
+/* =================== FILE MODAL =================== */
+function openFile(id){
+  const r=RETREATS.find(x=>x.id===id);
+  $("#modalBody").innerHTML=`
+    <button class="closex" id="closeModal">✕</button>
+    <div class="stamp">OPENED</div>
+    <h3>${r.no} · Declassified</h3>
+    <div class="ttl">${r.code}</div>
+    <div class="sub">${r.place} · ${r.flag}</div>
+    <ul class="moments">${r.moments.map(m=>`<li>${m}</li>`).join("")}</ul>
+    <div class="conv"><small>${r.conv.tag}</small>“${r.conv.line}”</div>
+    <div style="font-size:13px;color:#3a3328"><b>Why this file matters.</b> ${r.why}</div>
+    <div class="pillrow">${Object.keys(r.weights).map(t=>`<span class="pill">${t}</span>`).join("")}</div>`;
+  $("#modal").classList.add("open");
+  $("#closeModal").onclick=closeModal;
+}
+function closeModal(){ $("#modal").classList.remove("open"); }
+$("#modal").onclick=e=>{ if(e.target===$("#modal")) closeModal(); };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+
+/* =================== DOSSIER =================== */
+$("#toDossier").onclick=buildDossier;
+function fmtDate(){ return new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}); }
+function buildDossier(){
+  const top = (collectTags().length ? ranked() : RETREATS.map(r=>({...r,score:1}))).slice(0,3);
+  const leak = state.leakText.trim() || state.answers.leak || "—";
+  const hope = state.answers.hope || "an extraordinary year";
+  const recs = top.map((r,i)=>`
+    <div class="rec">
+      <div class="rno">Confidential Recommendation #${i+1} · ${r.no}</div>
+      <div class="rname">${r.code} — ${r.place}</div>
+      <div class="rwhy">You told me, off the record: <b>“${i===0?leak:hope}”</b>. ${r.why}</div>
+    </div>`).join("");
+
+  $("#passport").innerHTML=`
+    <div class="stamp">EYES ONLY</div>
+    <h2>Your Off-the-Record Dossier</h2>
+    <div class="dttl">A Confidential Briefing</div>
+    <div class="meta">Prepared ${fmtDate()} · Clearance: Member · Shred after reading (or don't — it's yours)</div>
+    <p style="font-size:13px;color:#3a3328;margin:14px 0 4px">
+      Based on what you said you're <b>not</b> putting on LinkedIn this year, here are the three journeys I'd quietly point you toward.
+    </p>
+    ${recs}
+    <div style="padding:18px 0 4px;font-size:13px;color:#3a3328">
+      <b>Conversations you may be ready for this year:</b>
+      <ul class="moments" style="margin-top:8px">
+        ${top.map(r=>`<li>“${r.conv.line}”</li>`).join("")}
+      </ul>
+    </div>
+    <div class="seal">
+      <div class="qr">${qrGlyph()}</div>
+      <div class="scan"><b>Step up to the desk.</b>Show this dossier at the Off-the-Record booth to unlock the full files — and find out which retreat is actually yours.</div>
+    </div>`;
+  show("dossier");
+}
+
+/* a stylised, deterministic "vault seal" glyph (decorative, not a scannable code) */
+function qrGlyph(){
+  const n=11, cell=84/n, pad=10; let rects="";
+  // deterministic pseudo-random from a fixed seed for a stable, classified look
+  let seed=1337;
+  const rnd=()=>{ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; };
+  for(let y=0;y<n;y++) for(let x=0;x<n;x++){
+    const finder=(x<3&&y<3)||(x>n-4&&y<3)||(x<3&&y>n-4);
+    if(finder || rnd()>0.55)
+      rects+=`<rect x="${pad+x*cell}" y="${pad+y*cell}" width="${cell-1}" height="${cell-1}" fill="#e8e2d2"/>`;
+  }
+  return `<svg viewBox="0 0 104 104">${rects}</svg>`;
+}
+
+$("#printDossier").onclick=()=>window.print();
+$("#restart").onclick=()=>{ state.step=0; state.answers={}; state.leakText=""; show("vault"); };
+
+/* live clock in header */
+setInterval(()=>{ const d=new Date();
+  $("#clock").textContent = `SECURE · ${d.toLocaleTimeString("en-GB",{hour12:false})}`; },1000);
+</script>
+</body>
+</html>
