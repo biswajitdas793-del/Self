@@ -56,6 +56,17 @@ stills later** by dropping image URLs into the `ART_IMG` map near the top of the
 scene-art block in `index.html`; `sceneArt()` will use the image automatically in
 place of the SVG.
 
+### Ambient sound per location
+Each film carries its own **procedurally-synthesised ambience** (Web Audio API —
+again, no audio files): a temple drone + bells at Patiala, sea swells + a bell at
+Somnath, a flowing river + aarti bells at Haridwar, open wind at Hampi, and slow
+ocean waves + a low underwater drone at the Andamans. The soundscape fades in when
+a film opens (file modal or kiosk) and fades out when it closes.
+- **Mute toggle** in the header (🔊 / 🔇); the preference is remembered in
+  `localStorage`.
+- Audio unlocks on the first tap (browser autoplay policy), so in the kiosk attract
+  loop sound begins once a visitor first interacts.
+
 ### The Intelligence Wall
 A backstage, aggregate view of what members confess (link in the header, a button
 on the dossier, and part of the kiosk attract loop):

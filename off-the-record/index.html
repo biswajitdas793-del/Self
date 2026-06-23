@@ -259,6 +259,7 @@
   <div class="wrap">
     <div class="brand"><span class="dot"></span>OFF&nbsp;THE&nbsp;RECORD</div>
     <div style="display:flex;align-items:center;gap:18px">
+      <button class="linkbtn" id="muteBtn" title="Toggle ambient sound" style="font-size:15px">🔈</button>
       <button class="linkbtn" id="navWall">Intelligence Wall</button>
       <div class="filemeta" id="clock">SECURE&nbsp;·&nbsp;CLEARANCE&nbsp;PENDING</div>
     </div>
@@ -713,8 +714,9 @@ function openFile(id){
     <div class="pillrow">${Object.keys(r.weights).map(t=>`<span class="pill">${t}</span>`).join("")}</div>`;
   $("#modal").classList.add("open");
   $("#closeModal").onclick=closeModal;
+  playAmbience(id);
 }
-function closeModal(){ $("#modal").classList.remove("open"); }
+function closeModal(){ $("#modal").classList.remove("open"); stopAmbience(); }
 $("#modal").onclick=e=>{ if(e.target===$("#modal")) closeModal(); };
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
 
@@ -852,6 +854,77 @@ $("#wallBack").onclick=()=>show("vault");
 $("#wallEnter").onclick=()=>{ resetExperience(); show("host"); runHostIntro(); };
 
 /* =================== KIOSK MODE =================== */
+/* =================== AMBIENT SOUND (procedural, Web Audio) ===================
+   No audio files — each location's ambience is synthesised live, so it stays
+   self-contained. Plays during films (file modal + kiosk), with a mute toggle. */
+let audioCtx=null, masterGain=null, curAmb=null;
+let muted = localStorage.getItem("otr_muted")==="1";
+function ensureAudio(){
+  if(!audioCtx){
+    try{
+      audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      masterGain=audioCtx.createGain(); masterGain.gain.value=muted?0:0.42;
+      masterGain.connect(audioCtx.destination);
+    }catch(e){ audioCtx=null; return; }
+  }
+  if(audioCtx.state==="suspended") audioCtx.resume();
+}
+function noiseBuffer(ctx,secs){ const len=ctx.sampleRate*(secs||3),buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=Math.random()*2-1; return buf; }
+function mkNoise(ctx){ const s=ctx.createBufferSource(); s.buffer=noiseBuffer(ctx,3); s.loop=true; return s; }
+function lfo(ctx,freq,depth,target){ const o=ctx.createOscillator(); o.frequency.value=freq;
+  const g=ctx.createGain(); g.gain.value=depth; o.connect(g).connect(target); o.start(); return o; }
+function patchWater(ctx,out,o){ const src=mkNoise(ctx),lp=ctx.createBiquadFilter(),g=ctx.createGain();
+  lp.type="lowpass"; lp.frequency.value=o.cutoff; g.gain.value=o.base;
+  src.connect(lp).connect(g).connect(out);
+  const l=lfo(ctx,o.swell,o.depth,g.gain); src.start();
+  return ()=>{ try{src.stop();l.stop();}catch(e){} }; }
+function patchWind(ctx,out){ const src=mkNoise(ctx),lp=ctx.createBiquadFilter(),g=ctx.createGain();
+  lp.type="lowpass"; lp.frequency.value=480; g.gain.value=0.16;
+  src.connect(lp).connect(g).connect(out);
+  const l1=lfo(ctx,0.08,260,lp.frequency),l2=lfo(ctx,0.05,0.07,g.gain); src.start();
+  return ()=>{ try{src.stop();l1.stop();l2.stop();}catch(e){} }; }
+function patchDrone(ctx,out,freqs,type){ const oscs=freqs.map(f=>{ const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type=type||"sine"; o.frequency.value=f; g.gain.value=0.09; o.connect(g).connect(out); o.start(); return o; });
+  return ()=>oscs.forEach(o=>{ try{o.stop();}catch(e){} }); }
+function patchBell(ctx,out,o){ const partials=[1,2.0,2.76,3.9];
+  function strike(){ const t=ctx.currentTime,decay=o.decay||3.2;
+    partials.forEach((p,i)=>{ const osc=ctx.createOscillator(),g=ctx.createGain();
+      osc.type="sine"; osc.frequency.value=o.base*p; osc.connect(g).connect(out);
+      const peak=0.16/(i+1); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(peak,t+0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+decay); osc.start(t); osc.stop(t+decay+0.1); }); }
+  strike(); const iv=setInterval(strike,o.every||7000); return ()=>clearInterval(iv); }
+
+const AMBIENCE={
+  patiala:(c,o)=>[patchDrone(c,o,[110,165,220],"sine"), patchBell(c,o,{base:300,every:9000,decay:3.6})],
+  somnath:(c,o)=>[patchWater(c,o,{cutoff:430,base:0.26,swell:0.10,depth:0.20}), patchBell(c,o,{base:360,every:8000,decay:4})],
+  haridwar:(c,o)=>[patchWater(c,o,{cutoff:1100,base:0.24,swell:0.24,depth:0.12}), patchBell(c,o,{base:430,every:6000,decay:3})],
+  hampi:(c,o)=>[patchWind(c,o), patchDrone(c,o,[98,147],"triangle")],
+  andamans:(c,o)=>[patchWater(c,o,{cutoff:360,base:0.30,swell:0.07,depth:0.22}), patchDrone(c,o,[70,105],"sine")]
+};
+function playAmbience(id){
+  if(muted||!AMBIENCE[id]) return; ensureAudio(); if(!audioCtx) return;
+  stopAmbience(true);
+  const ambGain=audioCtx.createGain(); ambGain.gain.value=0.0001; ambGain.connect(masterGain);
+  const cleanups=AMBIENCE[id](audioCtx,ambGain);
+  ambGain.gain.exponentialRampToValueAtTime(0.9, audioCtx.currentTime+1.4);
+  curAmb={gain:ambGain,cleanups};
+}
+function stopAmbience(immediate){
+  if(!curAmb||!audioCtx) return; const {gain,cleanups}=curAmb; curAmb=null;
+  const t=audioCtx.currentTime, fade=immediate?0.05:0.8;
+  try{ gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(Math.max(gain.gain.value,0.0001),t);
+       gain.gain.exponentialRampToValueAtTime(0.0001,t+fade); }catch(e){}
+  setTimeout(()=>{ cleanups.forEach(c=>{ try{c();}catch(e){} }); try{gain.disconnect();}catch(e){} }, fade*1000+80);
+}
+function updateMuteBtn(){ const b=$("#muteBtn"); if(b){ b.textContent=muted?"🔇":"🔊"; b.title=muted?"Sound off — tap to enable":"Sound on — tap to mute"; } }
+function setMuted(m){ muted=m; localStorage.setItem("otr_muted",m?"1":"0"); updateMuteBtn();
+  if(m){ stopAmbience(true); if(masterGain) masterGain.gain.value=0; }
+  else { ensureAudio(); if(masterGain) masterGain.gain.value=0.42; } }
+$("#muteBtn").onclick=()=>setMuted(!muted);
+updateMuteBtn();
+["pointerdown","keydown","touchstart"].forEach(ev=>window.addEventListener(ev,ensureAudio,{passive:true}));
+
 const KIOSK=new URLSearchParams(location.search).has("kiosk");
 const IDLE_MS=45000, ATTRACT_MS=8000;
 let idleTimer=null, attractTimer=null, attractStep=0;
@@ -865,8 +938,9 @@ function showFilm(id){
   $("#filmCap").innerHTML=`<div class="fc-no">${r.no} · ${r.flag.toUpperCase()}</div>
     <div class="fc-ttl">${r.code}</div><div class="fc-line">${r.place} — “${r.conv.line}”</div>`;
   f.classList.add("show");
+  playAmbience(id);
 }
-function hideFilm(){ $("#attractFilm").classList.remove("show"); }
+function hideFilm(){ $("#attractFilm").classList.remove("show"); stopAmbience(); }
 
 function tryFullscreen(){ if(KIOSK && document.documentElement.requestFullscreen && !document.fullscreenElement){ document.documentElement.requestFullscreen().catch(()=>{}); } }
 function stopAttract(){ clearInterval(attractTimer); attractTimer=null; hideFilm(); }
