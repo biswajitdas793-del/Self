@@ -223,6 +223,34 @@
   body.kiosk .attract-hint{display:block}
   body:not(.kiosk) .attract-hint{display:none}
   @keyframes fadepulse{0%,100%{opacity:.25}50%{opacity:.9}}
+
+  /* ===== Location scene art (anime stills + Ken Burns) ===== */
+  .scene-art{position:absolute;inset:0;overflow:hidden}
+  .scene-art svg{position:absolute;width:120%;height:120%;left:-10%;top:-10%;transform-origin:50% 60%;
+    animation:kenburns 22s ease-in-out infinite alternate;will-change:transform}
+  @keyframes kenburns{0%{transform:scale(1.04) translate(2%,1%)}100%{transform:scale(1.2) translate(-3%,-3%)}}
+  .sa-cloud{animation:sadrift 30s linear infinite}
+  @keyframes sadrift{from{transform:translateX(-7%)}to{transform:translateX(7%)}}
+  .sa-bob{animation:sabob 5.5s ease-in-out infinite}
+  @keyframes sabob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .sa-tw{animation:satw 3.4s ease-in-out infinite}
+  @keyframes satw{0%,100%{opacity:.2}50%{opacity:1}}
+
+  /* modal film banner */
+  .film-banner{position:relative;height:190px;margin:-34px -34px 22px;border-radius:4px 4px 0 0;overflow:hidden;background:#10131f}
+  .film-banner .fb-cap{position:absolute;left:18px;bottom:14px;z-index:2;color:#fff;
+    font-family:"Special Elite";font-size:20px;text-shadow:0 2px 12px rgba(0,0,0,.7)}
+  .film-banner .fb-cap span{display:block;font-family:"IBM Plex Mono";font-size:10px;letter-spacing:3px;color:var(--gold);text-shadow:none;margin-bottom:3px}
+  .film-banner::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 45%,rgba(8,8,10,.55))}
+
+  /* kiosk full-screen film */
+  .film{position:fixed;inset:0;z-index:60;background:#06070b;opacity:0;pointer-events:none;transition:opacity 1s ease}
+  .film.show{opacity:1}
+  .film .film-cap{position:absolute;left:0;right:0;bottom:8vh;z-index:2;text-align:center;color:#fff;padding:0 24px}
+  .film .film-cap .fc-no{font-family:"IBM Plex Mono";font-size:13px;letter-spacing:5px;color:var(--gold)}
+  .film .film-cap .fc-ttl{font-family:"Special Elite";font-size:clamp(30px,7vw,64px);margin:10px 0 6px;text-shadow:0 3px 24px rgba(0,0,0,.8)}
+  .film .film-cap .fc-line{font-size:14px;letter-spacing:2px;color:#d9d2c4;max-width:640px;margin:0 auto}
+  .film::after{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(120% 90% at 50% 30%,transparent 40%,rgba(4,5,8,.7))}
 </style>
 </head>
 <body>
@@ -332,6 +360,9 @@
 <div class="modal" id="modal">
   <div class="dossier" id="modalBody"></div>
 </div>
+
+<!-- ============ KIOSK FULL-SCREEN FILM ============ -->
+<div class="film" id="attractFilm"><div class="film-cap" id="filmCap"></div></div>
 
 <script>
 /* =================== DATA =================== */
@@ -591,11 +622,87 @@ function enableParallax(){
   }
 }
 
+/* =================== LOCATION SCENE ART (anime stills) ===================
+   Hand-built layered SVG scenes per location, animated with Ken Burns (CSS).
+   To swap in real AI-generated stills later, drop image URLs into ART_IMG
+   below — sceneArt() will use the image instead of the SVG automatically. */
+const ART_IMG = {
+  // patiala:"https://.../patiala.jpg", somnath:"...", haridwar:"...", hampi:"...", andamans:"..."
+};
+function dots(n,w,h,cls,color,r){ let s=""; for(let i=0;i<n;i++){
+  const x=Math.round(Math.random()*w), y=Math.round(Math.random()*h),
+        rr=(r*(0.5+Math.random())).toFixed(1), d=(Math.random()*3).toFixed(1);
+  s+=`<circle class="${cls}" cx="${x}" cy="${y}" r="${rr}" fill="${color}" style="animation-delay:${d}s"/>`;
+} return s; }
+
+function sceneSVG(id,uid){
+  const g=(stops)=>`<linearGradient id="sky${uid}" x1="0" y1="0" x2="0" y2="1">${stops}</linearGradient>`;
+  const W=1000,H=600, base=`viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"`;
+  switch(id){
+    case "patiala": return `<svg ${base}><defs>${g('<stop offset="0" stop-color="#f6c96f"/><stop offset=".55" stop-color="#ef9d5d"/><stop offset="1" stop-color="#c96b4a"/>')}</defs>
+      <rect width="${W}" height="${H}" fill="url(#sky${uid})"/>
+      <circle cx="500" cy="250" r="120" fill="#fff0c2" opacity=".9"/>
+      <g class="sa-cloud" opacity=".5" fill="#fff3d6"><ellipse cx="200" cy="150" rx="90" ry="22"/><ellipse cx="780" cy="110" rx="70" ry="18"/></g>
+      <g fill="#3a2417"><rect x="120" y="360" width="760" height="240"/>
+        <rect x="180" y="300" width="80" height="120"/><circle cx="220" cy="295" r="45"/><rect x="215" y="250" width="10" height="50"/>
+        <rect x="740" y="300" width="80" height="120"/><circle cx="780" cy="295" r="45"/><rect x="775" y="250" width="10" height="50"/>
+        <rect x="430" y="250" width="140" height="170"/><path d="M430 250 Q500 150 570 250 Z"/><rect x="495" y="120" width="10" height="60"/>
+        <rect x="330" y="330" width="50" height="90"/><rect x="620" y="330" width="50" height="90"/></g>
+      <rect x="0" y="540" width="${W}" height="60" fill="#241108"/></svg>`;
+
+    case "somnath": return `<svg ${base}><defs>${g('<stop offset="0" stop-color="#243a72"/><stop offset=".5" stop-color="#7c5a7e"/><stop offset="1" stop-color="#e8915a"/>')}</defs>
+      <rect width="${W}" height="${H}" fill="url(#sky${uid})"/>
+      <circle cx="640" cy="300" r="70" fill="#ffd9a0" opacity=".95"/>
+      <rect x="0" y="400" width="${W}" height="200" fill="#16314f"/>
+      <g class="sa-cloud" opacity=".35" fill="#cfe0ff"><ellipse cx="250" cy="120" rx="80" ry="16"/></g>
+      <g fill="#101c2b"><rect x="120" y="250" width="120" height="170"/><path d="M120 250 L180 110 L240 250 Z"/><rect x="173" y="80" width="14" height="40"/>
+        <rect x="270" y="320" width="60" height="100"/><path d="M270 320 L300 240 L330 320 Z"/></g>
+      <g opacity=".4" fill="#ffd9a0"><rect x="600" y="400" width="80" height="180"/></g>
+      <ellipse cx="0" cy="600" rx="0" ry="0"/></svg>`;
+
+    case "haridwar": return `<svg ${base}><defs>${g('<stop offset="0" stop-color="#0a0d1a"/><stop offset="1" stop-color="#221a33"/>')}</defs>
+      <rect width="${W}" height="${H}" fill="url(#sky${uid})"/>
+      ${dots(60,1000,300,"sa-tw","#fff",1.1)}
+      <rect x="0" y="330" width="${W}" height="270" fill="#0c1830"/>
+      <g fill="#070b16"><rect x="0" y="300" width="240" height="120"/><rect x="40" y="250" width="40" height="60"/><rect x="120" y="250" width="40" height="60"/>
+        <rect x="760" y="300" width="240" height="120"/><rect x="900" y="250" width="40" height="60"/></g>
+      <g class="sa-bob"><g fill="#ffb347">${[180,300,470,560,700,820].map((x,i)=>`<g style="transform:translateY(${i%2?6:0}px)"><ellipse cx="${x}" cy="${430+i%3*30}" rx="11" ry="7" opacity=".9"/><circle class="sa-tw" cx="${x}" cy="${424+i%3*30}" r="6" fill="#ffe39a"/></g>`).join("")}</g></g>
+      <g fill="#ff8a3d" class="sa-tw"><path d="M120 300 q8 -30 16 0 z"/><path d="M880 300 q8 -30 16 0 z"/></g></svg>`;
+
+    case "hampi": return `<svg ${base}><defs>${g('<stop offset="0" stop-color="#ffd9a0"/><stop offset=".5" stop-color="#f6a25d"/><stop offset="1" stop-color="#d77a4f"/>')}</defs>
+      <rect width="${W}" height="${H}" fill="url(#sky${uid})"/>
+      <circle cx="500" cy="220" r="90" fill="#fff2cf" opacity=".95"/>
+      <g class="sa-cloud" opacity=".4" fill="#fff3d6"><ellipse cx="760" cy="130" rx="70" ry="16"/></g>
+      <g fill="#2e2118"><path d="M120 600 L120 380 L160 380 L175 320 L300 320 L315 380 L355 380 L355 600 Z"/>
+        <rect x="150" y="340" width="40" height="40"/></g>
+      <g fill="#6b4a3a"><ellipse cx="560" cy="540" rx="130" ry="90"/><ellipse cx="560" cy="430" rx="90" ry="60"/><ellipse cx="560" cy="350" rx="55" ry="38"/></g>
+      <g fill="#5a3d30"><ellipse cx="820" cy="560" rx="140" ry="80"/><ellipse cx="820" cy="470" rx="80" ry="50"/></g>
+      <rect x="0" y="560" width="${W}" height="40" fill="#241810"/></svg>`;
+
+    case "andamans": return `<svg ${base}><defs>${g('<stop offset="0" stop-color="#06283d"/><stop offset=".6" stop-color="#0a4257"/><stop offset="1" stop-color="#0e5a6e"/>')}</defs>
+      <rect width="${W}" height="${H}" fill="url(#sky${uid})"/>
+      <circle cx="780" cy="150" r="55" fill="#eaf6ff" opacity=".9"/>
+      ${dots(45,1000,260,"sa-tw","#cfeaff",1)}
+      <rect x="0" y="380" width="${W}" height="220" fill="#072734"/>
+      <g fill="#04181f"><ellipse cx="300" cy="390" rx="220" ry="50"/><ellipse cx="820" cy="395" rx="180" ry="45"/></g>
+      <g fill="#7ef9ff">${dots(70,1000,200,"sa-tw","#7ef9ff",1.6).replace(/cy="(\d+)"/g,(m,y)=>`cy="${400+ (+y%180)}"`)}</g>
+      </svg>`;
+  }
+  return `<svg ${base}><rect width="${W}" height="${H}" fill="#10131f"/></svg>`;
+}
+let _artUid=0;
+function sceneArt(id){
+  const u="a"+(_artUid++);
+  if(ART_IMG[id]) return `<div class="scene-art"><img src="${ART_IMG[id]}" alt="" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"></div>`;
+  return `<div class="scene-art">${sceneSVG(id,u)}</div>`;
+}
+
 /* =================== FILE MODAL =================== */
 function openFile(id){
   const r=RETREATS.find(x=>x.id===id);
   $("#modalBody").innerHTML=`
     <button class="closex" id="closeModal">✕</button>
+    <div class="film-banner">${sceneArt(r.id)}<div class="fb-cap"><span>${r.no} · DECLASSIFIED</span>${r.place}</div></div>
     <div class="stamp">OPENED</div>
     <h3>${r.no} · Declassified</h3>
     <div class="ttl">${r.code}</div>
@@ -746,23 +853,37 @@ $("#wallEnter").onclick=()=>{ resetExperience(); show("host"); runHostIntro(); }
 
 /* =================== KIOSK MODE =================== */
 const KIOSK=new URLSearchParams(location.search).has("kiosk");
-const IDLE_MS=45000, ATTRACT_MS=12000;
-let idleTimer=null, attractTimer=null;
-function tryFullscreen(){ if(KIOSK && document.documentElement.requestFullscreen && !document.fullscreenElement){ document.documentElement.requestFullscreen().catch(()=>{}); } }
-function stopAttract(){ clearInterval(attractTimer); attractTimer=null; }
-function startAttract(){
-  if(!KIOSK) return; stopAttract();
-  attractTimer=setInterval(()=>{
-    if(scenes.wall.classList.contains("active")) show("vault");
-    else { buildWall(); show("wall"); }
-  },ATTRACT_MS);
+const IDLE_MS=45000, ATTRACT_MS=8000;
+let idleTimer=null, attractTimer=null, attractStep=0;
+
+function showFilm(id){
+  const r=RETREATS.find(x=>x.id===id); if(!r) return;
+  const f=$("#attractFilm");
+  // rebuild the scene art each cycle so the Ken Burns animation restarts
+  f.querySelector(".scene-art")?.remove();
+  f.insertAdjacentHTML("afterbegin", sceneArt(id));
+  $("#filmCap").innerHTML=`<div class="fc-no">${r.no} · ${r.flag.toUpperCase()}</div>
+    <div class="fc-ttl">${r.code}</div><div class="fc-line">${r.place} — “${r.conv.line}”</div>`;
+  f.classList.add("show");
 }
-function goAttract(){ resetExperience(); closeModal(); show("vault"); startAttract(); }
+function hideFilm(){ $("#attractFilm").classList.remove("show"); }
+
+function tryFullscreen(){ if(KIOSK && document.documentElement.requestFullscreen && !document.fullscreenElement){ document.documentElement.requestFullscreen().catch(()=>{}); } }
+function stopAttract(){ clearInterval(attractTimer); attractTimer=null; hideFilm(); }
+function attractTick(){
+  // sequence: each location film, then the intelligence wall, repeat
+  const seq=RETREATS.map(r=>r.id).concat(["__wall__"]);
+  const cur=seq[attractStep % seq.length]; attractStep++;
+  if(cur==="__wall__"){ hideFilm(); buildWall(); show("wall"); }
+  else { show("vault"); showFilm(cur); }
+}
+function startAttract(){ if(!KIOSK) return; stopAttract(); attractStep=0; attractTick(); attractTimer=setInterval(attractTick,ATTRACT_MS); }
+function goAttract(){ resetExperience(); closeModal(); startAttract(); }
 function resetIdle(){ if(!KIOSK) return; clearTimeout(idleTimer); idleTimer=setTimeout(goAttract,IDLE_MS); }
 if(KIOSK){
   document.body.classList.add("kiosk");
   ["pointerdown","keydown","touchstart"].forEach(ev=>
-    window.addEventListener(ev,()=>{ stopAttract(); resetIdle(); tryFullscreen(); },{passive:true}));
+    window.addEventListener(ev,()=>{ const wasAttract=attractTimer; stopAttract(); if(wasAttract) show("vault"); resetIdle(); tryFullscreen(); },{passive:true}));
   window.addEventListener("mousemove",resetIdle,{passive:true});
   resetIdle();
 }
