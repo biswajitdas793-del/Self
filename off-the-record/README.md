@@ -30,6 +30,36 @@ Plus an **Unlocked Conversations** strip — every retreat represented not by a
 destination but by a conversation (*"The apology underwater that no email could
 carry."*).
 
+## Booth features
+
+### Kiosk mode — `index.html?kiosk=1`
+Open the page with `?kiosk=1` to run it as an unattended booth kiosk:
+- **Fullscreen** on the first tap.
+- **Idle auto-reset** — after ~45s of no interaction it clears the member's
+  session and returns to the vault, ready for the next person.
+- **Attract loop** — while idle it cycles between the vault and the live
+  Intelligence Wall to pull a crowd, and a "Touch to begin" pulse appears.
+
+### The Intelligence Wall
+A backstage, aggregate view of what members confess (link in the header, a button
+on the dossier, and part of the kiosk attract loop):
+- **"What members aren't putting on LinkedIn this year"** — live breakdown of the
+  confession categories (Burnout, Family priorities, Adventure, Stuck, Meaning).
+- **Most-requested files** — which retreats get recommended most.
+- **Totals** — briefings logged, confessions intercepted.
+- **A redacted ticker** of anonymised, trimmed free-text confessions.
+
+**Storage:** submissions are saved in the browser's `localStorage` on the kiosk
+device — perfect for a single all-day booth, no backend or keys required. The wall
+seeds with a handful of sample entries so it looks alive on first run; real
+submissions replace nothing — they're simply added.
+
+**Multi-device aggregation (optional upgrade):** to pool confessions across several
+kiosks or show the wall on a separate screen, replace `loadSubs()/saveSubs()` in
+`index.html` with calls to a backend (e.g. a single Supabase table
+`off_record_submissions` with insert-only RLS, plus a read for aggregates). The
+data shape is already flat and ready: `{ ts, hope, time, leak, leakText, top[] }`.
+
 ## The five files
 
 | File | Codename | Destination | The conversation |

@@ -188,6 +188,41 @@
   }
   .footnote{text-align:center;color:var(--muted);font-size:11px;letter-spacing:1px;padding:30px 0 50px}
   .footnote a{color:var(--muted);text-decoration:underline}
+  .linkbtn{background:none;border:none;color:var(--muted);font-family:inherit;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-decoration:underline}
+  .linkbtn:hover{color:var(--gold)}
+
+  /* ===== Insights wall ===== */
+  .wall{padding:46px 0 90px}
+  .wall .whead{text-align:center;margin-bottom:8px}
+  .wall .whead .kick{font-size:11px;letter-spacing:4px;color:var(--red);text-transform:uppercase}
+  .wall .whead h2{font-size:clamp(24px,5vw,40px);color:var(--paper);margin-top:8px}
+  .wall .whead p{color:var(--muted);font-size:13px;max-width:600px;margin:10px auto 0}
+  .wcount{display:flex;justify-content:center;gap:34px;flex-wrap:wrap;margin:30px 0 36px}
+  .wcount .stat{text-align:center}
+  .wcount .stat b{display:block;font-family:"Special Elite";font-size:38px;color:var(--gold)}
+  .wcount .stat span{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+  .wgrid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  @media(max-width:720px){.wgrid{grid-template-columns:1fr}}
+  .panelbox{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:24px}
+  .panelbox h3{font-size:12px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:18px}
+  .bar{margin-bottom:15px}
+  .bar .blab{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;color:var(--ink)}
+  .bar .blab i{font-style:normal;color:var(--muted);font-size:12px}
+  .bar .track{height:10px;background:#0c0c0f;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+  .bar .fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-soft));width:0;border-radius:6px;transition:width 1.1s cubic-bezier(.2,.7,.3,1)}
+  .ticker{margin-top:30px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;overflow:hidden;white-space:nowrap}
+  .ticker .run{display:inline-block;animation:scrollx 38s linear infinite}
+  .ticker .intercept{display:inline-block;margin:0 26px;font-family:"Special Elite";font-size:15px;color:var(--ink)}
+  .ticker .intercept b{color:var(--red);font-family:"IBM Plex Mono";font-size:10px;letter-spacing:2px;margin-right:10px}
+  @keyframes scrollx{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .wnote{text-align:center;color:var(--muted);font-size:11px;letter-spacing:1px;margin-top:22px}
+  /* kiosk attract pulse */
+  body.kiosk .vault h1{animation:pulseglow 4s ease-in-out infinite}
+  @keyframes pulseglow{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 40px rgba(201,162,39,.35)}}
+  .attract-hint{margin-top:18px;font-size:12px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;opacity:0;animation:fadepulse 2.4s ease-in-out infinite}
+  body.kiosk .attract-hint{display:block}
+  body:not(.kiosk) .attract-hint{display:none}
+  @keyframes fadepulse{0%,100%{opacity:.25}50%{opacity:.9}}
 </style>
 </head>
 <body>
@@ -195,7 +230,10 @@
 <header class="bar">
   <div class="wrap">
     <div class="brand"><span class="dot"></span>OFF&nbsp;THE&nbsp;RECORD</div>
-    <div class="filemeta" id="clock">SECURE&nbsp;·&nbsp;CLEARANCE&nbsp;PENDING</div>
+    <div style="display:flex;align-items:center;gap:18px">
+      <button class="linkbtn" id="navWall">Intelligence Wall</button>
+      <div class="filemeta" id="clock">SECURE&nbsp;·&nbsp;CLEARANCE&nbsp;PENDING</div>
+    </div>
   </div>
 </header>
 
@@ -208,6 +246,7 @@
     <p class="tagline">Discover what this year's retreats <span class="red">won't tell you</span> in the brochure.</p>
     <button class="cta" id="enter">Request Access →</button>
     <div style="margin-top:22px"><button class="ghost" id="skip-to-files">Browse the vault</button></div>
+    <div class="attract-hint">▸ Touch to begin · Off the record ◂</div>
   </div>
 </section>
 
@@ -253,10 +292,39 @@
     <div class="passport" id="passport"></div>
     <div class="final-actions">
       <button class="cta" id="printDossier" style="margin-top:0">Save / Print Dossier</button>
+      <button class="ghost" id="toWall">See the Intelligence Wall</button>
       <button class="ghost" id="restart">Start over</button>
     </div>
     <p class="footnote">A concept experience for YPO retreats · Patiala · Somnath&nbsp;/&nbsp;Gir · Haridwar · Hampi · Andamans<br>
       Off the record means off the record. Nothing here leaves the room.</p>
+  </div>
+</section>
+
+<!-- ============ SCENE 5 — INTELLIGENCE / INSIGHTS WALL ============ -->
+<section class="scene" id="scene-wall">
+  <div class="wrap wall">
+    <div class="whead">
+      <div class="kick">Declassified · Aggregate Intelligence</div>
+      <h2>The Intelligence Wall</h2>
+      <p>What members tell the vault — that they'd never put on LinkedIn. Anonymous, aggregated, off the record. Updates live as the booth runs.</p>
+    </div>
+    <div class="wcount" id="wallStats"></div>
+    <div class="wgrid">
+      <div class="panelbox">
+        <h3>What members aren't posting this year</h3>
+        <div id="leakBars"></div>
+      </div>
+      <div class="panelbox">
+        <h3>Most-requested files</h3>
+        <div id="fileBars"></div>
+      </div>
+    </div>
+    <div class="ticker"><div class="run" id="ticker"></div></div>
+    <p class="wnote">Free-text confessions are anonymised and trimmed. Stored on this device only (kiosk-local). For multi-device aggregation, wire to a backend — see README.</p>
+    <div style="text-align:center;margin-top:28px">
+      <button class="cta" id="wallEnter" style="margin-top:0">Request Access →</button>
+      <div style="margin-top:14px"><button class="ghost" id="wallBack">← Back</button></div>
+    </div>
   </div>
 </section>
 
@@ -372,7 +440,7 @@ const state = { step:0, answers:{}, leakText:"" };
 
 /* =================== HELPERS =================== */
 const $ = s => document.querySelector(s);
-const scenes = { vault:$("#scene-vault"), host:$("#scene-host"), files:$("#scene-files"), dossier:$("#scene-dossier") };
+const scenes = { vault:$("#scene-vault"), host:$("#scene-host"), files:$("#scene-files"), dossier:$("#scene-dossier"), wall:$("#scene-wall") };
 function show(name){
   Object.values(scenes).forEach(s=>s.classList.remove("active"));
   scenes[name].classList.add("active");
@@ -576,6 +644,7 @@ function buildDossier(){
       <div class="qr">${qrGlyph()}</div>
       <div class="scan"><b>Step up to the desk.</b>Show this dossier at the Off-the-Record booth to unlock the full files — and find out which retreat is actually yours.</div>
     </div>`;
+  recordSubmission(top);
   show("dossier");
 }
 
@@ -594,7 +663,110 @@ function qrGlyph(){
 }
 
 $("#printDossier").onclick=()=>window.print();
-$("#restart").onclick=()=>{ state.step=0; state.answers={}; state.leakText=""; show("vault"); };
+function resetExperience(){ state.step=0; state.answers={}; state.leakText=""; }
+$("#restart").onclick=()=>{ resetExperience(); show("vault"); };
+
+/* =================== INTELLIGENCE WALL (kiosk-local storage) =================== */
+const SUB_KEY="otr_submissions_v1";
+const LEAK_LABELS=["Burnout","Family priorities","Desire for adventure","Feeling stuck","Searching for meaning"];
+function loadSubs(){ try{ return JSON.parse(localStorage.getItem(SUB_KEY)||"[]"); }catch(e){ return []; } }
+function saveSubs(a){ try{ localStorage.setItem(SUB_KEY, JSON.stringify(a.slice(-500))); }catch(e){} }
+function recordSubmission(top){
+  const all=loadSubs();
+  all.push({
+    ts:Date.now(),
+    hope:state.answers.hope||null,
+    time:state.answers.time||null,
+    leak:state.answers.leak||null,
+    leakText:(state.leakText||"").replace(/\s+/g," ").trim().slice(0,120),
+    top:(top||[]).map(r=>r.id)
+  });
+  saveSubs(all);
+}
+function seedIfEmpty(){
+  if(loadSubs().length) return;
+  const seed=[
+    {leak:"Burnout",leakText:"Haven't slept properly since the funding round.",top:["haridwar","somnath","andamans"]},
+    {leak:"Searching for meaning",leakText:"Hit every number and feel nothing.",top:["somnath","haridwar","hampi"]},
+    {leak:"Family priorities",leakText:"My kids book time with my assistant.",top:["andamans","patiala","haridwar"]},
+    {leak:"Feeling stuck",leakText:"",top:["hampi","somnath","patiala"]},
+    {leak:"Desire for adventure",leakText:"I want one thing this year that scares me.",top:["hampi","andamans","somnath"]},
+    {leak:"Burnout",leakText:"",top:["haridwar","andamans","somnath"]},
+    {leak:"Family priorities",leakText:"Want to be a dad, not a brand.",top:["andamans","patiala","haridwar"]},
+    {leak:"Searching for meaning",leakText:"",top:["somnath","haridwar","patiala"]}
+  ].map((s,i)=>({ts:Date.now()-(i+1)*8.64e7, hope:null, time:null, ...s, _seed:true}));
+  saveSubs(seed);
+}
+function buildWall(){
+  const subs=loadSubs();
+  const total=subs.length;
+  const leakCounts={}; LEAK_LABELS.forEach(l=>leakCounts[l]=0);
+  const fileCounts={}; RETREATS.forEach(r=>fileCounts[r.id]=0);
+  let confessions=0;
+  subs.forEach(s=>{
+    if(s.leak && leakCounts[s.leak]!=null) leakCounts[s.leak]++;
+    (s.top||[]).forEach(id=>{ if(fileCounts[id]!=null) fileCounts[id]++; });
+    if(s.leakText) confessions++;
+  });
+
+  $("#wallStats").innerHTML=`
+    <div class="stat"><b>${total}</b><span>Briefings logged</span></div>
+    <div class="stat"><b>${confessions}</b><span>Confessions intercepted</span></div>
+    <div class="stat"><b>${RETREATS.length}</b><span>Files in the vault</span></div>`;
+
+  const maxLeak=Math.max(1,...Object.values(leakCounts));
+  $("#leakBars").innerHTML=LEAK_LABELS.map(l=>{
+    const v=leakCounts[l], pct=Math.round(v/maxLeak*100), share=total?Math.round(v/total*100):0;
+    return `<div class="bar"><div class="blab"><span>${l}</span><i>${share}%</i></div>
+      <div class="track"><div class="fill" data-w="${pct}"></div></div></div>`;
+  }).join("");
+
+  const maxFile=Math.max(1,...Object.values(fileCounts));
+  const fileSorted=RETREATS.map(r=>({r,c:fileCounts[r.id]})).sort((a,b)=>b.c-a.c);
+  $("#fileBars").innerHTML=fileSorted.map(({r,c})=>{
+    const pct=Math.round(c/maxFile*100);
+    return `<div class="bar"><div class="blab"><span>${r.no} · ${r.code}</span><i>${c}×</i></div>
+      <div class="track"><div class="fill" data-w="${pct}"></div></div></div>`;
+  }).join("");
+
+  const quotes=subs.filter(s=>s.leakText).slice(-14).reverse();
+  const tape=quotes.length
+    ? quotes.map(q=>`<span class="intercept"><b>INTERCEPT</b>“${q.leakText}”</span>`).join("")
+    : `<span class="intercept"><b>INTERCEPT</b>No confessions yet — be the first.</span>`;
+  $("#ticker").innerHTML=tape+tape; // duplicate for seamless scroll
+
+  requestAnimationFrame(()=>document.querySelectorAll("#scene-wall .fill")
+    .forEach(f=>f.style.width=f.dataset.w+"%"));
+}
+
+$("#navWall").onclick=()=>{ buildWall(); show("wall"); };
+$("#toWall").onclick=()=>{ buildWall(); show("wall"); };
+$("#wallBack").onclick=()=>show("vault");
+$("#wallEnter").onclick=()=>{ resetExperience(); show("host"); runHostIntro(); };
+
+/* =================== KIOSK MODE =================== */
+const KIOSK=new URLSearchParams(location.search).has("kiosk");
+const IDLE_MS=45000, ATTRACT_MS=12000;
+let idleTimer=null, attractTimer=null;
+function tryFullscreen(){ if(KIOSK && document.documentElement.requestFullscreen && !document.fullscreenElement){ document.documentElement.requestFullscreen().catch(()=>{}); } }
+function stopAttract(){ clearInterval(attractTimer); attractTimer=null; }
+function startAttract(){
+  if(!KIOSK) return; stopAttract();
+  attractTimer=setInterval(()=>{
+    if(scenes.wall.classList.contains("active")) show("vault");
+    else { buildWall(); show("wall"); }
+  },ATTRACT_MS);
+}
+function goAttract(){ resetExperience(); closeModal(); show("vault"); startAttract(); }
+function resetIdle(){ if(!KIOSK) return; clearTimeout(idleTimer); idleTimer=setTimeout(goAttract,IDLE_MS); }
+if(KIOSK){
+  document.body.classList.add("kiosk");
+  ["pointerdown","keydown","touchstart"].forEach(ev=>
+    window.addEventListener(ev,()=>{ stopAttract(); resetIdle(); tryFullscreen(); },{passive:true}));
+  window.addEventListener("mousemove",resetIdle,{passive:true});
+  resetIdle();
+}
+seedIfEmpty();
 
 /* live clock in header */
 setInterval(()=>{ const d=new Date();
