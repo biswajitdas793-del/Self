@@ -67,6 +67,28 @@ a film opens (file modal or kiosk) and fades out when it closes.
 - Audio unlocks on the first tap (browser autoplay policy), so in the kiosk attract
   loop sound begins once a visitor first interacts.
 
+### Parallax depth on the films
+The location scenes have **real depth**: the scene and a soft foreground highlight
+move on separate planes driven by **mouse position** (desktop) or the **device
+gyroscope** (phones/tablets), layered on top of the Ken Burns motion. On iOS the
+motion permission is requested on the first tap. This is the same parallax illusion
+the files use — now applied to the films so the stills feel alive rather than flat.
+
+### Take-home dossier — real QR + lead capture
+The dossier now closes the loop for a member who's standing at the booth:
+- **Scannable QR code** (real, generated in-browser via an inlined, minified copy of
+  the MIT-licensed `qrcode-generator`). It encodes a **shareable URL** with the
+  member's answers + matches packed into the link hash, so scanning it opens *their
+  exact dossier* on their phone — theirs to keep. Arriving at `…/#d=…` rebuilds and
+  shows the dossier directly.
+- **Lead capture** — an optional name/email form. Saved leads live in `localStorage`
+  on the kiosk (`otr_leads_v1`) and surface as **"Members captured"** on the
+  Intelligence Wall. Email is lightly validated; everything stays on the device
+  unless you wire it to a backend.
+
+> Wiring leads to email/CRM: replace `saveLead()` in `index.html` with a POST to your
+> endpoint (or a Supabase insert). The shape is `{ ts, name, email, top[] }`.
+
 ### The Intelligence Wall
 A backstage, aggregate view of what members confess (link in the header, a button
 on the dossier, and part of the kiosk attract loop):
@@ -123,8 +145,9 @@ Or just double-click `index.html`. On a phone, the files respond to tilt
 - ✅ Self-contained, brandable, tunable in one file.
 - ⚠️ Not real AR — there's no live camera or 3D tracking. The "AR" is a parallax /
   gyroscope-driven illusion that conveys the intent.
-- ⚠️ The dossier "QR" is a **decorative vault seal**, not a scannable code. Wire it
-  to a real link/QR before any live use.
+- ✅ The dossier QR is a **real, scannable code** that opens the member's personalised
+  dossier on their phone. Lead capture is real but **kiosk-local** until you point
+  `saveLead()` at a backend.
 
 ## Making this its own repository
 
