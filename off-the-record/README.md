@@ -51,10 +51,16 @@ drifting clouds, bobbing lamps and twinkling light. They appear:
 - as **full-screen films** in the kiosk attract loop.
 
 No external images, APIs or keys — the art is generated in-browser, so it loads
-instantly and ships in the single HTML file. **Swap in real AI-generated anime
-stills later** by dropping image URLs into the `ART_IMG` map near the top of the
-scene-art block in `index.html`; `sceneArt()` will use the image automatically in
-place of the SVG.
+instantly and ships in the single HTML file.
+
+**Real AI anime stills (optional).** Five anime-style location stills have been
+generated in Canva, and `ART_IMG` in `index.html` already references them at
+`art/<id>.jpg`. The wiring is **fallback-safe**: each film renders the SVG scene as
+its base layer and overlays the photo only if the file loads — so until you add the
+JPGs the films look exactly as before, and the moment you drop them into `art/` they
+switch to the photos (with the same Ken Burns + parallax). See
+[`art/README.md`](art/README.md) for the Canva links and the one-step download
+instructions.
 
 ### Ambient sound per location
 Each film carries its own **procedurally-synthesised ambience** (Web Audio API —
